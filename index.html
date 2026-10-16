@@ -219,7 +219,7 @@ const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+":"+pad(s%60)}
 const isRun=id=>!!W[id].run;
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("show"),2600)}
 let ac;
-function unlockAudio(){try{if(navigator.audioSession)navigator.audioSession.type="playback"}catch(e){}try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state!=="running")ac.resume()}catch(e){}}
+function unlockAudio(){try{if(navigator.audioSession)navigator.audioSession.type="ambient"}catch(e){}try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state!=="running")ac.resume()}catch(e){}}
 function tone(f,d,t0,vol){const o=ac.createOscillator(),g=ac.createGain();o.type="square";o.frequency.value=f;o.connect(g);g.connect(ac.destination);const s=ac.currentTime+t0;g.gain.setValueAtTime(vol,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.start(s);o.stop(s+d)}
 function beep(f=880,d=.18,vib=250){try{unlockAudio();tone(f,d,0,.35)}catch(e){}try{navigator.vibrate&&navigator.vibrate(vib)}catch(e){}}
 function alarm(msg){
