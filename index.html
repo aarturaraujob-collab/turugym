@@ -125,6 +125,11 @@ main{max-width:600px;margin:0 auto;padding:4px 16px 150px}
 .tabs button span{display:block;font-size:20px;line-height:1}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:20;font-weight:500;max-width:90%;text-align:center;display:none}
 .toast.show{display:block}
+.flash{position:fixed;inset:0;z-index:30;background:var(--pri);color:var(--pri-ink);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px}
+.flash.show{display:flex}
+.flash b{font:800 52px/1 "Saira Condensed","Arial Narrow",sans-serif;text-transform:uppercase}
+.flash span{font-size:15px;opacity:.75}
+@media (prefers-reduced-motion:no-preference){.flash.show b{animation:pulse .6s ease-in-out 3}@keyframes pulse{50%{transform:scale(1.08)}}}
 @media (prefers-reduced-motion:no-preference){.chk.on{animation:pop .18s ease-out}@keyframes pop{50%{transform:scale(1.08)}}}
 </style>
 </head>
@@ -141,6 +146,7 @@ main{max-width:600px;margin:0 auto;padding:4px 16px 150px}
   <button data-act="tab" data-v="history" id="tabHist"><span>📈</span>Histórico</button>
 </div></nav>
 <div class="toast" id="toast"></div>
+<div class="flash" id="flash" data-act="flash-off"><b></b><span>Toque para fechar</span></div>
 
 <script>
 /* ---------- plano ---------- */
@@ -212,7 +218,17 @@ const fmt=n=>Number(n).toLocaleString("pt-BR",{maximumFractionDigits:1});
 const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+":"+pad(s%60)};
 const isRun=id=>!!W[id].run;
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("show"),2600)}
-let ac;function beep(f=880,d=.18){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.25,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d)}catch(e){}try{navigator.vibrate&&navigator.vibrate(250)}catch(e){}}
+let ac;
+function unlockAudio(){try{if(navigator.audioSession)navigator.audioSession.type="playback"}catch(e){}try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state!=="running")ac.resume()}catch(e){}}
+function tone(f,d,t0,vol){const o=ac.createOscillator(),g=ac.createGain();o.type="square";o.frequency.value=f;o.connect(g);g.connect(ac.destination);const s=ac.currentTime+t0;g.gain.setValueAtTime(vol,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.start(s);o.stop(s+d)}
+function beep(f=880,d=.18,vib=250){try{unlockAudio();tone(f,d,0,.35)}catch(e){}try{navigator.vibrate&&navigator.vibrate(vib)}catch(e){}}
+function alarm(msg){
+  try{unlockAudio();[0,.32,.64,1.1,1.42,1.74].forEach(t=>tone(1046,.22,t,.6))}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([400,150,400,150,400])}catch(e){}
+  const f=$("#flash");f.querySelector("b").textContent=msg;f.classList.add("show");clearTimeout(alarm.h);alarm.h=setTimeout(()=>f.classList.remove("show"),4000);
+  try{if(document.hidden&&"Notification"in window&&Notification.permission==="granted")new Notification("TURUGYM",{body:msg})}catch(e){}
+}
+function askNotif(){try{if("Notification"in window&&Notification.permission==="default"&&!askNotif.done){askNotif.done=1;Notification.requestPermission()}}catch(e){}}
 
 /* ---------- dados ---------- */
 const LS="th_logs_v1";let logs={};
@@ -369,19 +385,20 @@ async function wakeOn(){try{if(navigator.wakeLock&&!wake)wake=await navigator.wa
 function wakeOff(){try{wake&&wake.release()}catch(e){}wake=null}
 function runAdvance(){
   R.i++;
-  if(R.i>=R.ph.length){R.on=false;beep(660,.5);wakeOff();cur.done=true;save(cur.id);toast("Corrida concluída e salva");render();return}
-  const p=R.ph[R.i];R.end=Date.now()+p.d*1000;R.left=p.d;beep(p.z===3?990:520,.3);
+  if(R.i>=R.ph.length){R.on=false;alarm("Corrida concluída!");wakeOff();cur.done=true;save(cur.id);render();return}
+  const p=R.ph[R.i];R.end=Date.now()+p.d*1000;R.left=p.d;
+  try{unlockAudio();const f=p.z===3?1046:620;[0,.25,.5].forEach(t=>tone(f,.18,t,.55))}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}
 }
 
 /* ---------- descanso ---------- */
 let rest={end:0,total:0};
-function startRest(s){if(!s)return;rest.total=s;rest.end=Date.now()+s*1000;$("#rest").classList.add("show");paintRest()}
+function startRest(s){if(!s)return;rest.total=s;rest.tick=0;rest.end=Date.now()+s*1000;$("#rest").classList.add("show");paintRest();wakeOn();askNotif()}
 function paintRest(){const left=(rest.end-Date.now())/1000;$("#restT").innerHTML=mmss(left)+"<small>Descanso</small>"}
-function stopRest(){rest.end=0;$("#rest").classList.remove("show")}
+function stopRest(){rest.end=0;$("#rest").classList.remove("show");if(!(R&&R.on))wakeOff()}
 
 setInterval(()=>{
-  if(rest.end){if(Date.now()>=rest.end){stopRest();beep(880,.35)}else paintRest()}
-  if(R&&R.on){if(Date.now()>=R.end)runAdvance();runPaint()}
+  if(rest.end){const l=(rest.end-Date.now())/1000;if(l<=0){stopRest();alarm("Bora, próxima série!")}else{const c=Math.ceil(l);if(c<=3&&c!==rest.tick){rest.tick=c;beep(660,.08,60)}paintRest()}}
+  if(R&&R.on){if(Date.now()>=R.end)runAdvance();else{const c=Math.ceil((R.end-Date.now())/1000);if(c<=3&&c!==R.tick){R.tick=c;beep(660,.08,60)}}runPaint()}
 },250);
 
 /* ---------- histórico ---------- */
@@ -441,6 +458,7 @@ document.addEventListener("input",e=>{
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
   const act=b.dataset.act,v=b.dataset.v;
+  if(act==="flash-off"){$("#flash").classList.remove("show");return}
   if(act==="tab"){go({name:v});return}
   if(act==="home"){R&&R.on&&(R.on=false,R.left=(R.end-Date.now())/1000);wakeOff();go({name:"home"});return}
   if(act==="tab-history"){go({name:"history"});return}
@@ -483,6 +501,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&R&&R.on)wakeOn()});
 
+document.addEventListener("pointerdown",unlockAudio,{passive:true});
 lsLoad();render();cloudInit();
 </script>
 </body>
