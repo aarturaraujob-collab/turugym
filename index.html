@@ -131,6 +131,31 @@ main{max-width:600px;margin:0 auto;padding:4px 16px 150px}
 .flash span{font-size:15px;opacity:.75}
 @media (prefers-reduced-motion:no-preference){.flash.show b{animation:pulse .6s ease-in-out 3}@keyframes pulse{50%{transform:scale(1.08)}}}
 @media (prefers-reduced-motion:no-preference){.chk.on{animation:pop .18s ease-out}@keyframes pop{50%{transform:scale(1.08)}}}
+
+.users{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin:0 0 12px}
+.users button{border:0;background:none;border-radius:10px;padding:10px;font-weight:600;color:var(--muted)}
+.users button.on{background:var(--pri);color:var(--pri-ink)}
+button.day{font:inherit;width:100%}
+.day.sel{background:var(--pri);border-color:var(--pri)}
+.day.sel b,.day.sel span{color:var(--pri-ink)}
+.day.sel.done span::after{color:var(--pri-ink)}
+.day span.sm{font-size:13px}
+.edit-day{display:block;width:100%;border:0;background:none;color:var(--pri-ink);opacity:.8;text-decoration:underline;margin-top:12px;font-size:15px;padding:6px}
+.modal{position:fixed;inset:0;z-index:25;display:none}
+.modal.show{display:block}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.modal-in{position:absolute;left:0;right:0;bottom:0;max-width:600px;margin:0 auto;background:var(--bg);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));max-height:85vh;overflow-y:auto}
+.modal-in h2{font-size:26px;margin-bottom:6px}
+.modal-in p{margin:0 0 12px;color:var(--muted)}
+.modal-in input,.modal-in textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:500 18px "Saira",sans-serif;padding:12px}
+.modal-in textarea{font-size:13px;height:140px}
+.err{color:var(--danger)!important;font-weight:500;min-height:1.2em;margin:8px 0 0!important}
+.chips{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.chips button{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px}
+.chips button b{min-width:30px;font-family:"Saira Condensed",sans-serif;font-size:18px;color:var(--pri-text)}
+.chips button.on{border-color:var(--pri-text);background:var(--soft);font-weight:600}
+.chips button.on::after{content:"✓";margin-left:auto;color:var(--pri-text)}
+.row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 </style>
 </head>
 <body>
@@ -146,6 +171,7 @@ main{max-width:600px;margin:0 auto;padding:4px 16px 150px}
   <button data-act="tab" data-v="history" id="tabHist"><span>📈</span>Histórico</button>
 </div></nav>
 <div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="modal-bg" data-act="modal-close"></div><div class="modal-in" id="modal-in"></div></div>
 <div class="flash" id="flash" data-act="flash-off"><b></b><span>Toque para fechar</span></div>
 
 <script>
@@ -164,11 +190,19 @@ const EX={
   supart:{n:"Supino inclinado articulado"},remm:{n:"Remada máquina pegada neutra"},desm:{n:"Desenvolvimento máquina"},
   martelo:{n:"Rosca martelo c/ halteres"},puxab:{n:"Puxada aberta"},rembt:{n:"Remada baixa c/ triângulo"},
   cruinvm:{n:"Crucifixo inverso máquina"},testa:{n:"Tríceps testa na polia c/ corda"},roscacorda:{n:"Rosca martelo na polia c/ corda"},
-  bulg:{n:"Búlgaro"},peck:{n:"Voador (peck deck)"}
+  bulg:{n:"Búlgaro"},peck:{n:"Voador (peck deck)"},
+  hipm:{n:"Hip thrust na máquina"},stiffh:{n:"Stiff com halteres"},mesaflex:{n:"Mesa ou cadeira flexora"},
+  afundo:{n:"Afundo no Smith ou búlgaro"},puxfr:{n:"Puxada frontal na polia"},remsp:{n:"Remada sentada na polia"},
+  roscah:{n:"Rosca bíceps com halteres"},supincm:{n:"Supino inclinado na máquina"},remap:{n:"Remada com apoio no peito"},
+  roscap:{n:"Rosca bíceps na polia"},tricacima:{n:"Tríceps acima da cabeça na polia"},agsmith:{n:"Agachamento no Smith"},
+  glute:{n:"Hip thrust ou glute drive"},deadbug:{n:"Dead bug",t:"bw"},crunch:{n:"Crunch abdominal",t:"bw"},
+  pranchal:{n:"Prancha lateral",t:"time"},birddog:{n:"Bird dog",t:"bw"},elevj:{n:"Elevação de joelhos deitado",t:"bw"},
+  bikeab:{n:"Abdominal bicicleta lento",t:"bw"}
 };
 const F4=[15,15,15,15],P=[15,12,10,8],D4=["máx","máx","máx","máx"],T12=[12,12,12];
 const W={
-  A:{n:"Treino A",s:"Costas + bíceps",warm:"Mobilidade de ombro + 2 séries leves na puxada. Use strap nas puxadas e remadas se o pulso reclamar.",ex:[
+
+  A:{u:"artur",k:"A",n:"Treino A",s:"Costas + bíceps",warm:"Mobilidade de ombro + 2 séries leves na puxada. Use strap nas puxadas e remadas se o pulso reclamar.",ex:[
     {id:"puxtri",r:[8,8,8],rg:"6–8",rest:120,sug:60,tag:"Principal do dia. Deixe 1–2 reps no tanque."},
     {id:"remm",r:[10,10,10],rg:"8–10",rest:90,sug:45},
     {id:"puxab",r:[12,12,12],rg:"10–12",rest:90,sug:55},
@@ -176,7 +210,7 @@ const W={
     {id:"cruinvm",r:[15,15,15],rg:"12–15",rest:60,sug:35,tag:"Posterior de ombro: dá a largura do shape visto de frente"},
     {id:"roscaw",r:[10,10,10],rg:"8–10",rest:75,sug:25,tag:"Carga total com a barra"},
     {id:"martelo",r:[12,12,12],rg:"10–12",rest:60,h:1,sug:12}]},
-  B:{n:"Treino B",s:"Peito + ombro + tríceps",warm:"Mobilidade de ombro + 2 séries leves no supino. Pegada neutra sempre que der.",ex:[
+  B:{u:"artur",k:"B",n:"Treino B",s:"Peito + ombro + tríceps",warm:"Mobilidade de ombro + 2 séries leves no supino. Pegada neutra sempre que der.",ex:[
     {id:"supm",r:[8,8,8,8],rg:"6–8",rest:150,sug:80,tag:"Principal do dia. Punho reto, sem dobrar para trás."},
     {id:"supart",r:[10,10,10],rg:"8–10",rest:90,sug:60,tag:"Sem a articulada: supino inclinado no smith ou com halteres"},
     {id:"cross",r:[15,15,15],rg:"12–15",rest:60,sug:17.5},
@@ -184,7 +218,7 @@ const W={
     {id:"ella",r:[15,15,15,15],rg:"12–15",rest:60,h:1,sug:10,tag:"Prioridade do shape: controle a descida"},
     {id:"tricorda",r:[12,12,12],rg:"10–12",rest:60,sug:25},
     {id:"testa",r:[12,12,12],rg:"10–12",rest:60,sug:27.5}]},
-  C:{n:"Treino C",s:"Upper body · foco peito, ombro e braços",warm:"Mobilidade de ombro + 1 série leve no supino.",ex:[
+  C:{u:"artur",k:"C",n:"Treino C",s:"Upper body · foco peito, ombro e braços",warm:"Mobilidade de ombro + 1 série leve no supino.",ex:[
     {id:"supi",r:[12,12,12],rg:"10–12",rest:90,h:1,sug:18,tag:"Pegada neutra, palmas uma de frente para a outra"},
     {id:"peck",r:[15,15,15],rg:"12–15",rest:60,sug:45},
     {id:"puxtri",r:[12,12,12],rg:"10–12",rest:90,sug:50},
@@ -192,7 +226,7 @@ const W={
     {id:"ella",r:[15,15,15],rg:"12–15",rest:60,h:1,sug:10},
     {id:"roscaw",r:[12,12,12],rg:"10–12",rest:0,sug:22,tag:"Bi-set: emende com o tríceps corda"},
     {id:"tricorda",r:[12,12,12],rg:"10–12",rest:60,sug:22,tag:"Bi-set"}]},
-  D:{n:"Treino D",s:"Inferiores + corrida",warm:"5 min de bike leve + 2 séries leves no primeiro exercício. A corrida 1:1 vem depois.",ex:[
+  D:{u:"artur",k:"D",n:"Treino D",s:"Inferiores + corrida",warm:"5 min de bike leve + 2 séries leves no primeiro exercício. A corrida 1:1 vem depois.",ex:[
     {id:"hack",r:[8,8,8],rg:"6–8",rest:150,sug:100,tag:"Sem hack na sua unidade: agachamento no smith"},
     {id:"lp45",r:[12,12,12],rg:"10–12",rest:120,sug:200},
     {id:"thrust",r:[10,10,10],rg:"8–10",rest:90,sug:60,tag:"No smith ou na máquina de glúteo. As mãos só estabilizam."},
@@ -200,11 +234,55 @@ const W={
     {id:"ext",r:[15,15,15],rg:"12–15",rest:60,sug:75},
     {id:"abd",r:[15,15],rg:"12–15",rest:45,sug:85},
     {id:"pantlp",r:[15,15,15],rg:"12–15",rest:45,sug:120}]},
-  R1:{n:"Corrida 1:3",s:"7× (30s rápido + 90s leve)",run:[30,90]},
-  R2:{n:"Corrida 1:2",s:"7× (45s rápido + 90s leve)",run:[45,90]},
-  R3:{n:"Corrida 1:1",s:"7× (1 min rápido + 1 min leve)",run:[60,60]}
+  R1:{u:"artur",k:"1:3",ico:"🏃",n:"Corrida 1:3",s:"7× (30s rápido + 90s leve)",run:[30,90]},
+  R2:{u:"artur",k:"1:2",ico:"🏃",n:"Corrida 1:2",s:"7× (45s rápido + 90s leve)",run:[45,90]},
+  R3:{u:"artur",k:"1:1",ico:"🏃",n:"Corrida 1:1",s:"7× (1 min rápido + 1 min leve)",run:[60,60]},
+  LA:{u:"laila",k:"IA",n:"Inferiores A",s:"Glúteos e posteriores",warm:"Alguns minutos de movimento leve + 1–3 séries progressivas no hip thrust (não contam).",ex:[
+    {id:"hipm",r:[12,12,12],rg:"8–12",rest:150,tag:"Principal do dia. Termine sentindo que faria mais 1–3 reps."},
+    {id:"stiffh",r:[12,12,12],rg:"8–12",rest:120,h:1},
+    {id:"mesaflex",r:[15,15,15],rg:"10–15",rest:75},
+    {id:"afundo",r:[12,12],rg:"8–12 por perna",rest:90},
+    {id:"abd",r:[20,20,20],rg:"12–20",rest:60}]},
+  LB:{u:"laila",k:"SA",n:"Superiores A",s:"Costas e bíceps",warm:"Alguns minutos de movimento leve + 1–3 séries progressivas na puxada (não contam).",ex:[
+    {id:"puxfr",r:[12,12,12],rg:"8–12",rest:120},
+    {id:"remsp",r:[12,12,12],rg:"8–12",rest:120},
+    {id:"supm",r:[12,12,12],rg:"8–12",rest:120},
+    {id:"ella",r:[15,15,15],rg:"12–15",rest:75,h:1},
+    {id:"roscah",r:[15,15,15],rg:"10–15",rest:75,h:1},
+    {id:"tricorda",r:[15,15],rg:"10–15",rest:75}]},
+  LC:{u:"laila",k:"SB",n:"Superiores B",s:"Peito, ombros e equilíbrio",warm:"Alguns minutos de movimento leve + 1–3 séries progressivas no supino (não contam).",ex:[
+    {id:"supincm",r:[12,12,12],rg:"8–12",rest:120},
+    {id:"remap",r:[12,12,12],rg:"8–12",rest:120},
+    {id:"desm",r:[12,12],rg:"8–12",rest:90},
+    {id:"cruinvm",r:[15,15,15],rg:"12–15",rest:75},
+    {id:"roscap",r:[15,15],rg:"10–15",rest:75},
+    {id:"tricacima",r:[15,15],rg:"10–15",rest:75}]},
+  LD:{u:"laila",k:"IB",n:"Inferiores B",s:"Quadríceps e glúteos",warm:"Alguns minutos de movimento leve + 1–3 séries progressivas no agachamento (não contam).",ex:[
+    {id:"agsmith",r:[12,12,12],rg:"8–12",rest:150,tag:"Principal do dia. Termine sentindo que faria mais 1–3 reps."},
+    {id:"lp45",r:[12,12,12],rg:"10–12",rest:120},
+    {id:"ext",r:[15,15,15],rg:"10–15",rest:75},
+    {id:"glute",r:[12,12,12],rg:"10–12",rest:90},
+    {id:"flex",r:[15,15],rg:"10–15",rest:75},
+    {id:"abd",r:[20,20],rg:"15–20",rest:60,tag:"Opcional"}]},
+  LK1:{u:"laila",k:"🚶",ico:"🚶",n:"Caminhada 30 min",s:"Leve a moderada",phases:[{z:2,d:1800,l:"Caminhada"}],
+    note:"Ritmo que permita conversar sem ficar muito ofegante. Não sacrifique o sono para treinar cedo. Depois, o abdômen."},
+  LK2:{u:"laila",k:"🚲",ico:"🚲",n:"Caminhada ou bike",s:"20–30 min, leve a moderada",phases:[{z:2,d:1500,l:"Caminhada ou bike"}],
+    note:"Ajuste a duração conforme a recuperação das pernas depois de sexta. Depois, o abdômen."},
+  LAB1:{u:"laila",k:"AB",n:"Abdômen 1",s:"Dead bug, pranchas e crunch",warm:"Depois do cardio. Descanse 30–45s entre exercícios. Começando? Faça 2 séries.",ex:[
+    {id:"deadbug",r:[12,12,12],rg:"8–12 por lado",rest:40},
+    {id:"prancha",r:["20–40s","20–40s","20–40s"],rest:40},
+    {id:"crunch",r:[15,15,15],rg:"12–15",rest:40,tag:"Sem puxar o pescoço"},
+    {id:"pranchal",r:["15–30s cada lado","15–30s cada lado","15–30s cada lado"],rest:40}]},
+  LAB2:{u:"laila",k:"AB",n:"Abdômen 2",s:"Bird dog, joelhos e bicicleta",warm:"Depois do cardio. Descanse 30–45s entre exercícios. Começando? Faça 2 séries.",ex:[
+    {id:"birddog",r:[12,12,12],rg:"8–12 por lado",rest:40},
+    {id:"elevj",r:[15,15,15],rg:"10–15",rest:40,tag:"Lombar controlada no chão"},
+    {id:"bikeab",r:[12,12,12],rg:"8–12 por lado",rest:40},
+    {id:"prancha",r:["20–40s","20–40s","20–40s"],rest:40}]}
 };
-const DAYS={1:["A"],2:["R1"],3:["B"],4:["R2"],5:["C"],6:["D","R3"],0:[]};
+const USERS={
+  artur:{n:"Artur",list:["A","B","C","D","R1","R2","R3"],def:{0:[],1:["A"],2:["R1"],3:["B"],4:["R2"],5:["C"],6:["D","R3"]}},
+  laila:{n:"Laila",list:["LA","LB","LC","LD","LK1","LK2","LAB1","LAB2"],def:{0:["LA"],1:["LB"],2:["LK1","LAB1"],3:[],4:["LC"],5:["LD"],6:["LK2","LAB2"]}}
+};
 const DN=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const DFULL=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
 
@@ -216,8 +294,10 @@ const today=()=>ds(new Date());
 const br=s=>{const[y,m,d]=s.split("-");return d+"/"+m};
 const fmt=n=>Number(n).toLocaleString("pt-BR",{maximumFractionDigits:1});
 const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+":"+pad(s%60)};
-const isRun=id=>!!W[id].run;
-function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("show"),2600)}
+const norm=s=>(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase();
+const isRun=id=>!!(W[id]&&(W[id].run||W[id].phases));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("show"),2800)}
 let ac;
 function unlockAudio(){try{if(navigator.audioSession)navigator.audioSession.type="ambient"}catch(e){}try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state!=="running")ac.resume()}catch(e){}}
 function tone(f,d,t0,vol){const o=ac.createOscillator(),g=ac.createGain();o.type="square";o.frequency.value=f;o.connect(g);g.connect(ac.destination);const s=ac.currentTime+t0;g.gain.setValueAtTime(vol,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.start(s);o.stop(s+d)}
@@ -231,49 +311,67 @@ function alarm(msg){
 function askNotif(){try{if("Notification"in window&&Notification.permission==="default"&&!askNotif.done){askNotif.done=1;Notification.requestPermission()}}catch(e){}}
 
 /* ---------- dados ---------- */
-const LS="th_logs_v1";let logs={};
+const LS="th_logs_v1",LSS="th_sched_v1",LSU="th_user";
+let logs={},sched={},schedUpd=0,user="artur";
 const S={col:null,cloud:false,chain:{},timers:{}};
-function lsLoad(){try{logs=JSON.parse(localStorage.getItem(LS)||"{}")||{}}catch(e){logs={}}}
+function fixLog(l){if(l&&!l.u)l.u=(W[l.w]&&W[l.w].u)||"artur";return l}
+function lsLoad(){
+  try{logs=JSON.parse(localStorage.getItem(LS)||"{}")||{}}catch(e){logs={}}
+  try{const o=JSON.parse(localStorage.getItem(LSS)||"null");if(o){sched=o.sched||{};schedUpd=o.upd||0}}catch(e){}
+  try{const u=localStorage.getItem(LSU);if(u&&USERS[u])user=u}catch(e){}
+  Object.values(logs).forEach(fixLog);
+}
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(logs))}catch(e){}}
-function save(id){
-  logs[id].upd=Date.now();lsSave();
-  if(!S.col)return;
+function push(id){
+  if(!S.col||!logs[id])return;
   clearTimeout(S.timers[id]);
   S.timers[id]=setTimeout(()=>{
-    const data=JSON.parse(JSON.stringify(logs[id]));
+    if(!logs[id])return;const data=JSON.parse(JSON.stringify(logs[id]));
     S.chain[id]=(S.chain[id]||Promise.resolve()).then(()=>S.col.doc(id).set(data)).catch(()=>{});
   },700);
 }
+function save(id){logs[id].upd=Date.now();lsSave();push(id)}
 function remove(id){delete logs[id];lsSave();if(S.col){S.chain[id]=(S.chain[id]||Promise.resolve()).then(()=>S.col.doc(id).delete()).catch(()=>{})}}
+function pushSched(){if(!S.col)return;const d={sched:JSON.parse(JSON.stringify(sched)),upd:schedUpd};S.chain._s=(S.chain._s||Promise.resolve()).then(()=>S.col.doc("_sched").set(d)).catch(()=>{})}
+function saveSched(){schedUpd=Date.now();try{localStorage.setItem(LSS,JSON.stringify({sched,upd:schedUpd}))}catch(e){}pushSched()}
 async function cloudInit(){
   if(!window.claude||!window.claude.use)return;
   try{
-    const[db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
-    if(!db||!user)return;
-    const uid=await user.id();if(!uid)return;
+    const[db,u]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!db||!u)return;
+    const uid=await u.id();if(!uid)return;
     S.col=db.collection("data/users/"+uid);
-    const snap=await S.col.get();const seen=new Set();
-    snap.docs.forEach(d=>{const v=d.data();if(!v||!v.id)return;seen.add(d.id);if(!logs[v.id]||(v.upd||0)>=(logs[v.id].upd||0))logs[v.id]=v;else save(v.id)});
-    Object.keys(logs).forEach(k=>{if(!seen.has(k))save(k)});
+    const snap=await S.col.get();const seen=new Set();let remoteSched=null;
+    snap.docs.forEach(d=>{const v=d.data();if(!v)return;
+      if(d.id==="_sched"){remoteSched=v;return}
+      if(!v.id)return;fixLog(v);seen.add(d.id);
+      if(!logs[v.id]||(v.upd||0)>=(logs[v.id].upd||0))logs[v.id]=v;else push(v.id)});
+    Object.keys(logs).forEach(k=>{if(!seen.has(k))push(k)});
+    if(remoteSched&&(remoteSched.upd||0)>schedUpd){sched=remoteSched.sched||{};schedUpd=remoteSched.upd||0;try{localStorage.setItem(LSS,JSON.stringify({sched,upd:schedUpd}))}catch(e){}}
+    else if(schedUpd>0)pushSched();
     lsSave();S.cloud=true;
     if(view.name!=="workout"&&view.name!=="run")render();else{const e=$("#sync");if(e)e.textContent="☁︎ salvo"}
   }catch(e){}
 }
 function getLog(wid,date){
   const id=date+"_"+wid;
-  if(!logs[id])logs[id]={id,date,w:wid,sets:{},done:false,upd:0};
+  if(!logs[id])logs[id]={id,date,w:wid,u:W[wid].u,sets:{},done:false,upd:0};
   return logs[id];
 }
 function hasData(l){if(!l)return false;if(l.done)return true;return Object.values(l.sets||{}).some(a=>a.some(s=>s&&s.ok))}
+const mine=()=>Object.values(logs).filter(l=>l.u===user);
 function prevSets(exId,beforeId){
-  const arr=Object.values(logs).filter(l=>l.id!==beforeId&&l.sets&&l.sets[exId]&&l.sets[exId].some(s=>s&&s.ok)).sort((a,b)=>b.date.localeCompare(a.date)||(b.upd-a.upd));
+  const arr=mine().filter(l=>l.id!==beforeId&&l.sets&&l.sets[exId]&&l.sets[exId].some(s=>s&&s.ok)).sort((a,b)=>b.date.localeCompare(a.date)||(b.upd-a.upd));
   return arr[0]?arr[0].sets[exId]:null;
 }
-function lastDone(wid){const a=Object.values(logs).filter(l=>l.w===wid&&hasData(l)).sort((a,b)=>b.date.localeCompare(a.date));return a[0]?a[0].date:null}
+function lastDone(wid){const a=mine().filter(l=>l.w===wid&&hasData(l)).sort((a,b)=>b.date.localeCompare(a.date));return a[0]?a[0].date:null}
+function plan(dow,u=user){const s=sched[u];if(s&&s[dow]!==undefined)return s[dow].filter(w=>W[w]&&W[w].u===u);return USERS[u].def[dow]||[]}
 
 /* ---------- estado de tela ---------- */
-let view={name:"home"};let cur=null;
+let view={name:"home"};let cur=null;let selDow=null;
 function go(v){view=v;render();window.scrollTo(0,0)}
+function openModal(h){$("#modal-in").innerHTML=h;$("#modal").classList.add("show")}
+function closeModal(){$("#modal").classList.remove("show");$("#modal-in").innerHTML=""}
 
 /* ---------- render ---------- */
 function render(){
@@ -289,34 +387,38 @@ function render(){
 function hdr(title,sub,back){
   return `<div class="top">${back?`<button class="back" data-act="${back}" aria-label="Voltar">‹</button>`:""}<h1>${title}${sub?`<span class="sub">${sub}</span>`:""}</h1><span class="sync" id="sync">${S.cloud?"☁︎ salvo":""}</span></div>`;
 }
+function userPills(){return `<div class="users">${Object.entries(USERS).map(([k,u])=>`<button class="${k===user?"on":""}" data-act="user" data-v="${k}">${u.n}</button>`).join("")}</div>`}
 function home(){
-  const now=new Date(),dow=now.getDay(),t=today();
-  const mon=new Date(now);mon.setDate(now.getDate()-((dow+6)%7));
-  let week="";
+  const now=new Date(),tdow=now.getDay(),t=today();
+  const dow=selDow==null?tdow:selDow;
+  const mon=new Date(now);mon.setDate(now.getDate()-((tdow+6)%7));
+  let week="",selDate=t;
   for(let i=0;i<7;i++){
     const d=new Date(mon);d.setDate(mon.getDate()+i);const k=ds(d),wd=d.getDay();
-    const plan=DAYS[wd];const done=plan.length&&plan.every(w=>hasData(logs[k+"_"+w]));
-    const lab=plan.length?plan.map(w=>isRun(w)?"🏃":w).join(""):"–";
-    week+=`<div class="day${k===t?" today":""}${done?" done":""}"><b>${DN[wd]}</b><span>${lab}</span></div>`;
+    const doneW=mine().filter(l=>l.date===k&&hasData(l)).map(l=>l.w);
+    const show=doneW.length?doneW:plan(wd);
+    const lab=show.length?show.map(w=>W[w].ico||W[w].k).join(""):"–";
+    if(wd===dow)selDate=k;
+    week+=`<button class="day${k===t?" today":""}${wd===dow?" sel":""}${doneW.length?" done":""}" data-act="day" data-v="${wd}" aria-label="${DFULL[wd]}"><b>${DN[wd]}</b><span class="${lab.length>2?"sm":""}">${lab}</span></button>`;
   }
-  const plan=DAYS[dow];
-  let card=`<div class="today-card"><h2 style="font-size:30px">Hoje, ${DFULL[dow]} ${br(t)}</h2>`;
-  if(!plan.length)card+=`<p>Dia de descanso. Amanhã tem Treino A.</p>`;
+  const pl=plan(dow),isT=dow===tdow;
+  let card=`<div class="today-card"><h2 style="font-size:30px">${isT?"Hoje, ":""}${DFULL[dow]} ${br(selDate)}</h2>`;
+  if(!pl.length)card+=`<p>Dia de descanso.</p>`;
   else{
-    card+=`<p>${plan.length>1?"Musculação primeiro, corrida depois.":"Bora."}</p>`;
-    plan.forEach(w=>{const ok=hasData(logs[t+"_"+w]);card+=`<button class="go${ok?" ok":""}" data-act="open" data-v="${w}"><span><strong>${W[w].n}</strong><small>${ok?"Feito ✓ toque para revisar":W[w].s}</small></span><span style="font-size:26px">›</span></button>`});
+    card+=`<p>${isT?(pl.length>1?"Na ordem abaixo.":"Bora."):"Quer adiantar? Pode fazer hoje mesmo."}</p>`;
+    pl.forEach(w=>{const ok=hasData(logs[t+"_"+w]);card+=`<button class="go${ok?" ok":""}" data-act="open" data-v="${w}"><span><strong>${W[w].n}</strong><small>${ok?"Feito hoje ✓ toque para revisar":W[w].s}</small></span><span style="font-size:26px">›</span></button>`});
   }
-  card+=`</div>`;
+  card+=`<button class="edit-day" data-act="edit-day" data-v="${dow}">✎ Mudar os treinos de ${DFULL[dow]}</button></div>`;
   let list="";
-  ["A","B","C","D","R1","R2","R3"].forEach(w=>{
+  USERS[user].list.forEach(w=>{
     const ld=lastDone(w);
-    list+=`<button class="item" data-act="open" data-v="${w}"><span class="letter${isRun(w)?" run":""}">${isRun(w)?W[w].n.slice(-3):w}</span><div><strong>${W[w].n} <span style="color:var(--muted);font-weight:400">${W[w].s}</span></strong><small>${ld?"Última vez: "+br(ld):"Ainda não feito"}</small></div><span>›</span></button>`;
+    list+=`<button class="item" data-act="open" data-v="${w}"><span class="letter${isRun(w)?" run":""}">${W[w].k}</span><div><strong>${W[w].n} <span style="color:var(--muted);font-weight:400">${W[w].s}</span></strong><small>${ld?"Última vez: "+br(ld):"Ainda não feito"}</small></div><span>›</span></button>`;
   });
-  return hdr("TURUGYM")+`<main><div class="week">${week}</div>${card}<h2 class="section-title">Todos os treinos</h2><div class="list">${list}</div></main>`;
+  return hdr("TURUGYM")+`<main>${userPills()}<div class="week">${week}</div>${card}<h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div></main>`;
 }
 function workout(){
   const w=W[cur.w],l=cur;
-  let h=hdr(w.n,w.s+" · "+br(l.date),"home")+`<main>`;
+  let h=hdr(w.n,w.s+" · "+br(l.date)+" · "+USERS[w.u].n,"home")+`<main>`;
   if(w.warm)h+=`<p class="note">${w.warm}<br><b>Progressão:</b> bateu o topo da faixa em todas as séries? Suba 2,5–5 kg no próximo treino.</p>`;
   w.ex.forEach((e,ei)=>{
     const ex=EX[e.id],t=ex.t||"kg",sets=l.sets[e.id]||[],prev=prevSets(e.id,l.id);
@@ -329,12 +431,12 @@ function workout(){
     e.r.forEach((target,si)=>{
       const s=sets[si]||{},p=prev&&prev[si]&&prev[si].ok?prev[si]:null;
       const sg=e.sug!=null?(Array.isArray(e.sug)?e.sug[si]:e.sug):null;
-      const prevTxt=p?(t==="kg"?fmt(p.kg||0)+" × "+p.reps:t==="bw"?p.reps+" reps":"feito"):(sg!=null&&t==="kg"?"sugerido":"—");
+      let prevTxt=p?(t==="kg"?fmt(p.kg||0)+" × "+p.reps:t==="bw"?p.reps+" reps":"feito"):(sg!=null&&t==="kg"?"sugerido":"—");
+      if(t==="time")prevTxt=target+(p?" · feito antes":"");
       const repPh=p&&p.reps!=null?p.reps:target;
       h+=`<div class="${cls}${s.ok?" row-done":""}"><span class="n">${si+1}</span><span class="prev">${prevTxt}</span>`;
       if(t==="kg")h+=`<input inputmode="decimal" aria-label="Carga série ${si+1}" data-in="kg" data-e="${ei}" data-s="${si}" value="${s.kg??""}" placeholder="${p&&p.kg!=null?fmt(p.kg):sg!=null?fmt(sg):"kg"}">`;
       if(t!=="time")h+=`<input inputmode="numeric" aria-label="Repetições série ${si+1}" data-in="reps" data-e="${ei}" data-s="${si}" value="${s.reps??""}" placeholder="${repPh}">`;
-      if(t==="time")h=h.replace(/<span class="prev">([^<]*)<\/span>$/,`<span class="prev">${target}${p?" · feito antes":""}</span>`);
       h+=`<button class="chk${s.ok?" on":""}" data-act="chk" data-e="${ei}" data-s="${si}" aria-label="Concluir série ${si+1}">✓</button></div>`;
     });
     h+=`</section>`;
@@ -344,27 +446,29 @@ function workout(){
   return h+`</main>`;
 }
 
-/* ---------- corrida ---------- */
+/* ---------- corrida / cardio ---------- */
 let R=null;
 function phases(w){
+  if(W[w].phases)return W[w].phases.map(p=>({...p}));
   const[f,s]=W[w].run;const p=[{z:1,d:300,l:"Aquecimento leve"}];
   for(let i=1;i<=7;i++){p.push({z:3,d:f,l:"Rápido",k:i});p.push({z:1,d:s,l:"Leve",k:i})}
   p.push({z:1,d:300,l:"Desaquecimento leve"});return p;
 }
 function runView(){
   const w=W[cur.w],l=cur;
-  if(!R||R.w!==cur.w||R.date!==l.date)R={w:cur.w,date:l.date,ph:phases(cur.w),i:0,left:300,end:0,on:false};
+  if(!R||R.w!==cur.w||R.date!==l.date){const ph=phases(cur.w);R={w:cur.w,date:l.date,ph,i:0,left:ph[0].d,end:0,on:false}}
   const total=R.ph.reduce((a,p)=>a+p.d,0);
   let steps="";R.ph.forEach((p,i)=>{steps+=`<i class="${p.z===3?"z3":""}${i<R.i?" past":""}${i===R.i?" cur":""}" style="flex:${p.d}"></i>`});
   const feel=["Fácil","Ok","Pesado"].map(f=>`<button class="${l.feel===f?"on":""}" data-act="feel" data-v="${f}">${f}</button>`).join("");
-  return hdr(w.n,w.s+" · "+br(l.date),"home")+`<main>
-  <p class="note">Faça o aquecimento dinâmico antes. Rápido = Z3 (70–79% FCmáx, conversa com dificuldade). Leve = Z1 (dá pra conversar).</p>
-  <div class="phase" id="ph"><div class="label" id="phL"></div><div class="clock" id="phC">5:00</div><div class="next" id="phN"></div></div>
-  <div class="steps" id="steps">${steps}</div>
-  <div class="row2"><button class="btn" data-act="run-toggle" id="runBtn">Começar</button><button class="btn ghost" data-act="run-skip">Pular etapa</button></div>
-  <p style="color:var(--muted);font-size:14px;text-align:center;margin:10px 0 18px">Total: ${Math.round(total/60)} min. O app apita e vibra a cada troca.</p>
+  const note=w.note||"Faça o aquecimento dinâmico antes. Rápido = Z3 (70–79% FCmáx, conversa com dificuldade). Leve = Z1 (dá pra conversar).";
+  return hdr(w.n,w.s+" · "+br(l.date)+" · "+USERS[w.u].n,"home")+`<main>
+  <p class="note">${note}</p>
+  <div class="phase" id="ph"><div class="label" id="phL"></div><div class="clock" id="phC"></div><div class="next" id="phN"></div></div>
+  ${R.ph.length>1?`<div class="steps" id="steps">${steps}</div>`:`<div class="steps" id="steps" style="display:none">${steps}</div>`}
+  <div class="row2"><button class="btn" data-act="run-toggle" id="runBtn">Começar</button><button class="btn ghost" data-act="run-skip">${R.ph.length>1?"Pular etapa":"Encerrar"}</button></div>
+  <p style="color:var(--muted);font-size:14px;text-align:center;margin:10px 0 18px">Total: ${Math.round(total/60)} min. O app apita ${R.ph.length>1?"a cada troca":"no final"}.</p>
   <h2 class="section-title">Como foi?</h2><div class="feel">${feel}</div>
-  <button class="btn" data-act="run-done">${l.done?"Corrida registrada ✓":"Marcar corrida como feita"}</button>
+  <button class="btn" data-act="run-done">${l.done?"Registrado ✓ (confirmar de novo)":"Finalizar"}</button>
   ${hasData(l)?'<button class="btn danger" data-act="del">Apagar este registro</button>':""}
   </main>`;
 }
@@ -373,10 +477,10 @@ function runPaint(){
   const p=R.ph[R.i],left=R.on?(R.end-Date.now())/1000:R.left;
   const ph=$("#ph");if(!ph)return;
   ph.classList.toggle("z3",!!p&&p.z===3);
-  if(!p){$("#phL").textContent="Corrida concluída";$("#phC").textContent="✓";$("#phN").textContent="Toque em marcar como feita.";$("#runBtn").textContent="Recomeçar";return}
-  $("#phL").textContent=p.l+(p.k?` · tiro ${p.k}/7`:"")+(p.z===3?" · Z3":" · Z1");
+  if(!p){$("#phL").textContent="Concluído";$("#phC").textContent="✓";$("#phN").textContent="Toque em finalizar para salvar.";$("#runBtn").textContent="Recomeçar";return}
+  $("#phL").textContent=p.l+(p.k?` · tiro ${p.k}/7`:"")+(p.z===3?" · Z3":p.z===1?" · Z1":"");
   $("#phC").textContent=mmss(left);
-  const n=R.ph[R.i+1];$("#phN").textContent=n?"Depois: "+n.l.toLowerCase()+" "+mmss(n.d):"Última etapa";
+  const n=R.ph[R.i+1];$("#phN").textContent=n?"Depois: "+n.l.toLowerCase()+" "+mmss(n.d):(R.ph.length>1?"Última etapa":"");
   $("#runBtn").textContent=R.on?"Pausar":(R.i===0&&R.left===R.ph[0].d?"Começar":"Continuar");
   document.querySelectorAll("#steps i").forEach((el,i)=>{el.classList.toggle("past",i<R.i);el.classList.toggle("cur",i===R.i)});
 }
@@ -385,48 +489,80 @@ async function wakeOn(){try{if(navigator.wakeLock&&!wake)wake=await navigator.wa
 function wakeOff(){try{wake&&wake.release()}catch(e){}wake=null}
 function runAdvance(){
   R.i++;
-  if(R.i>=R.ph.length){R.on=false;alarm("Corrida concluída!");wakeOff();cur.done=true;save(cur.id);render();return}
+  if(R.i>=R.ph.length){R.on=false;alarm("Concluído!");wakeOff();render();openFinish();return}
   const p=R.ph[R.i];R.end=Date.now()+p.d*1000;R.left=p.d;
   try{unlockAudio();const f=p.z===3?1046:620;[0,.25,.5].forEach(t=>tone(f,.18,t,.55))}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}
 }
 
 /* ---------- descanso ---------- */
-let rest={end:0,total:0};
+let rest={end:0,total:0,tick:0};
 function startRest(s){if(!s)return;rest.total=s;rest.tick=0;rest.end=Date.now()+s*1000;$("#rest").classList.add("show");paintRest();wakeOn();askNotif()}
 function paintRest(){const left=(rest.end-Date.now())/1000;$("#restT").innerHTML=mmss(left)+"<small>Descanso</small>"}
 function stopRest(){rest.end=0;$("#rest").classList.remove("show");if(!(R&&R.on))wakeOff()}
-
 setInterval(()=>{
   if(rest.end){const l=(rest.end-Date.now())/1000;if(l<=0){stopRest();alarm("Bora, próxima série!")}else{const c=Math.ceil(l);if(c<=3&&c!==rest.tick){rest.tick=c;beep(660,.08,60)}paintRest()}}
   if(R&&R.on){if(Date.now()>=R.end)runAdvance();else{const c=Math.ceil((R.end-Date.now())/1000);if(c<=3&&c!==R.tick){R.tick=c;beep(660,.08,60)}}runPaint()}
 },250);
 
+/* ---------- finalizar com nome ---------- */
+function openFinish(){
+  openModal(`<h2>Finalizar</h2><p>Digite seu nome para confirmar que o treino é seu (${esc(USERS[user].n)}).</p>
+  <input id="who" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Seu nome" aria-label="Seu nome">
+  <p class="err" id="whoErr"></p>
+  <button class="btn" data-act="confirm-finish">Confirmar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);
+  setTimeout(()=>{const i=$("#who");i&&i.focus()},50);
+}
+function confirmFinish(){
+  const v=norm($("#who").value);
+  if(v!==user){$("#whoErr").textContent=v?`Esse nome não confere com o perfil ${USERS[user].n}.`:"Digite seu nome.";return}
+  closeModal();cur.done=true;cur.by=user;save(cur.id);stopRest();
+  let n=0,vol=0;Object.values(cur.sets||{}).forEach(a=>a.forEach(s=>{if(s&&s.ok){n++;vol+=(+s.kg||0)*(+s.reps||0)}}));
+  const msg=isRun(cur.w)?`${W[cur.w].n} salvo`:`${W[cur.w].n} salvo: ${n} séries${vol?", "+fmt(vol)+" kg de volume":""}`;
+  const t=today(),pl=plan(new Date().getDay()),i=pl.indexOf(cur.w);
+  const nx=i>=0?pl.slice(i+1).find(w=>!hasData(logs[t+"_"+w])):null;
+  if(nx){cur=getLog(nx,t);go({name:isRun(nx)?"run":"workout"});toast(msg+". Agora: "+W[nx].n)}
+  else{go({name:"home"});toast(msg)}
+}
+
+/* ---------- editar dia ---------- */
+let ED=null;
+function dayModal(){
+  const U=USERS[user];
+  return `<h2>${DFULL[ED.dow]}</h2><p>Escolha os treinos deste dia (${esc(U.n)}). Vale para todas as semanas. Nenhum marcado = descanso.</p>
+  <div class="chips">${U.list.map(w=>`<button class="${ED.sel.includes(w)?"on":""}" data-act="toggle-day-w" data-v="${w}"><b>${W[w].k}</b>${W[w].n}</button>`).join("")}</div>
+  <button class="btn" data-act="save-day">Salvar</button>
+  <div class="row-btns"><button class="btn ghost" data-act="reset-day">Voltar ao padrão</button><button class="btn ghost" data-act="modal-close">Cancelar</button></div>`;
+}
+
 /* ---------- histórico ---------- */
 function history(){
-  const map={};
-  Object.values(logs).forEach(l=>{if(isRun(l.w))return;Object.entries(l.sets||{}).forEach(([k,a])=>{if(a.some(s=>s&&s.ok)){(map[k]=map[k]||[]).push(l)}})});
+  const map={};const ml=mine();
+  ml.forEach(l=>{if(isRun(l.w))return;Object.entries(l.sets||{}).forEach(([k,a])=>{if(EX[k]&&a.some(s=>s&&s.ok)){(map[k]=map[k]||[]).push(l)}})});
   const keys=Object.keys(map).sort((a,b)=>EX[a].n.localeCompare(EX[b].n));
-  const runs=Object.values(logs).filter(l=>isRun(l.w)&&hasData(l)).sort((a,b)=>b.date.localeCompare(a.date));
-  let h=hdr("Histórico","Toque num exercício para ver a evolução")+`<main>`;
-  if(!keys.length&&!runs.length)return h+`<p class="empty">Nada registrado ainda. Conclua uma série no treino de hoje e ela aparece aqui.</p></main>`;
+  const runs=ml.filter(l=>isRun(l.w)&&hasData(l)).sort((a,b)=>b.date.localeCompare(a.date));
+  let h=hdr("Histórico","Perfil "+USERS[user].n+" · toque num exercício para ver a evolução")+`<main>${userPills()}`;
+  if(!keys.length&&!runs.length)h+=`<p class="empty">Nada registrado ainda. Conclua uma série e ela aparece aqui.</p>`;
   if(keys.length){h+=`<h2 class="section-title">Exercícios</h2><div class="list">`;
     keys.forEach(k=>{const ls=map[k].sort((a,b)=>b.date.localeCompare(a.date));const best=bestOf(k);
       h+=`<button class="item" data-act="exd" data-v="${k}"><div><strong>${EX[k].n}</strong><small>${ls.length} ${ls.length>1?"treinos":"treino"} · último ${br(ls[0].date)}${best?" · melhor "+best:""}</small></div><span>›</span></button>`});
     h+=`</div>`}
-  if(runs.length){h+=`<h2 class="section-title" style="margin-top:20px">Corridas</h2>`;
-    runs.forEach(l=>{h+=`<div class="hist-row"><strong>${br(l.date)} · ${W[l.w].n}</strong><div class="sets">${W[l.w].s}${l.feel?" · "+l.feel:""}</div></div>`})}
-  h+=`<button class="btn danger" style="margin-top:24px" data-act="wipe">Apagar todo o histórico</button>`;
+  if(runs.length){h+=`<h2 class="section-title" style="margin-top:20px">Cardio</h2>`;
+    runs.forEach(l=>{h+=`<div class="hist-row"><strong>${br(l.date)} · ${W[l.w]?W[l.w].n:l.w}</strong><div class="sets">${W[l.w]?W[l.w].s:""}${l.feel?" · "+l.feel:""}</div></div>`})}
+  h+=`<h2 class="section-title" style="margin-top:24px">Backup</h2><p style="color:var(--muted);font-size:15px;margin:0 0 6px">Guarda os dados de todos os perfis. Cole o texto nas Notas ou no WhatsApp.</p>
+  <button class="btn" data-act="bk-wa">📲 Enviar backup pro WhatsApp</button>
+  <div class="row-btns" style="margin-top:8px"><button class="btn ghost" data-act="bk-copy">Copiar backup</button><button class="btn ghost" data-act="bk-open">Restaurar</button></div>
+  <button class="btn danger" style="margin-top:16px" data-act="wipe">Apagar histórico de ${USERS[user].n}</button>`;
   return h+`</main>`;
 }
 function sessVal(k,sets){const t=EX[k].t||"kg";const ok=sets.filter(s=>s&&s.ok);if(!ok.length)return null;
   if(t==="kg")return Math.max(...ok.map(s=>+s.kg||0));if(t==="bw")return ok.reduce((a,s)=>a+(+s.reps||0),0);return ok.length}
-function bestOf(k){const t=EX[k].t||"kg";let b=null;Object.values(logs).forEach(l=>{const a=l.sets&&l.sets[k];if(!a)return;a.forEach(s=>{if(!s||!s.ok)return;if(t==="kg"){if(b===null||(+s.kg||0)>b.kg||((+s.kg||0)===b.kg&&+s.reps>b.reps))b={kg:+s.kg||0,reps:+s.reps||0}}})});return b?fmt(b.kg)+" kg × "+b.reps:""}
+function bestOf(k){const t=EX[k].t||"kg";if(t!=="kg")return"";let b=null;mine().forEach(l=>{const a=l.sets&&l.sets[k];if(!a)return;a.forEach(s=>{if(!s||!s.ok)return;const kg=+s.kg||0,r=+s.reps||0;if(b===null||kg>b.kg||(kg===b.kg&&r>b.reps))b={kg,reps:r}})});return b?fmt(b.kg)+" kg × "+b.reps:""}
 function exDetail(){
   const k=view.id,ex=EX[k],t=ex.t||"kg";
-  const ls=Object.values(logs).filter(l=>l.sets&&l.sets[k]&&l.sets[k].some(s=>s&&s.ok)).sort((a,b)=>a.date.localeCompare(b.date));
+  const ls=mine().filter(l=>l.sets&&l.sets[k]&&l.sets[k].some(s=>s&&s.ok)).sort((a,b)=>a.date.localeCompare(b.date));
   const pts=ls.map(l=>({d:l.date,v:sessVal(k,l.sets[k])}));
   const unit=t==="kg"?"Carga máxima (kg)":t==="bw"?"Total de repetições":"Séries feitas";
-  let h=hdr(ex.n,unit+" por treino","tab-history")+`<main>`;
+  let h=hdr(ex.n,unit+" por treino · "+USERS[user].n,"tab-history")+`<main>`;
   if(pts.length){
     const W0=320,H0=150,px=28,py=18,vs=pts.map(p=>p.v),mn=Math.min(...vs),mx=Math.max(...vs),rg=mx-mn||1;
     const X=i=>pts.length===1?W0/2:px+i*(W0-2*px)/(pts.length-1),Y=v=>H0-py-(v-mn)/rg*(H0-2*py)+(mx===mn?-(H0/2-py):0);
@@ -442,9 +578,21 @@ function exDetail(){
     const ok=l.sets[k].filter(s=>s&&s.ok);
     const txt=ok.map(s=>t==="kg"?fmt(s.kg||0)+"×"+s.reps:t==="bw"?s.reps:"✓").join("  ");
     const vol=t==="kg"?ok.reduce((a,s)=>a+(+s.kg||0)*(+s.reps||0),0):0;
-    h+=`<div class="hist-row"><strong>${br(l.date)} · ${W[l.w].n}</strong><div class="sets">${txt}${vol?`  ·  volume ${fmt(vol)} kg`:""}</div></div>`;
+    h+=`<div class="hist-row"><strong>${br(l.date)} · ${W[l.w]?W[l.w].n:l.w}</strong><div class="sets">${txt}${vol?`  ·  volume ${fmt(vol)} kg`:""}</div></div>`;
   });
   return h+`</main>`;
+}
+function waLink(t){
+  const copy=()=>{try{navigator.clipboard.writeText(t).then(()=>toast("Backup copiado. Abra o WhatsApp e cole na conversa."),()=>{})}catch(e){}};
+  if(t.length<6000){try{const w=window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank");if(!w)copy()}catch(e){copy()}}else copy();
+}
+function backupText(){return JSON.stringify({turugym:1,logs,sched,schedUpd})}
+function restore(txt){
+  let o;try{const a=txt.indexOf("{"),z=txt.lastIndexOf("}");o=JSON.parse(txt.slice(a,z+1))}catch(e){return "Texto inválido. Cole a mensagem do backup inteira."}
+  if(!o||!o.logs)return "Esse texto não é um backup do TURUGYM.";
+  let n=0;Object.values(o.logs).forEach(l=>{if(!l||!l.id)return;fixLog(l);const ex=logs[l.id];if(!ex||(l.upd||0)>(ex.upd||0)){logs[l.id]=l;push(l.id);n++}});
+  if(o.sched&&(o.schedUpd||0)>schedUpd){sched=o.sched;schedUpd=o.schedUpd;try{localStorage.setItem(LSS,JSON.stringify({sched,upd:schedUpd}))}catch(e){}pushSched()}
+  lsSave();return n;
 }
 
 /* ---------- eventos ---------- */
@@ -455,39 +603,45 @@ document.addEventListener("input",e=>{
   const v=el.value.replace(",",".");a[si][el.dataset.in]=v===""?null:+v;
   if(a[si].ok)save(cur.id);
 });
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target&&e.target.id==="who"){e.preventDefault();confirmFinish()}});
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
   const act=b.dataset.act,v=b.dataset.v;
   if(act==="flash-off"){$("#flash").classList.remove("show");return}
+  if(act==="modal-close"){closeModal();return}
   if(act==="tab"){go({name:v});return}
-  if(act==="home"){R&&R.on&&(R.on=false,R.left=(R.end-Date.now())/1000);wakeOff();go({name:"home"});return}
+  if(act==="user"){if(v===user)return;user=v;try{localStorage.setItem(LSU,v)}catch(e){}selDow=null;R=null;render();toast("Perfil: "+USERS[v].n);return}
+  if(act==="day"){selDow=+v;render();return}
+  if(act==="home"){if(R&&R.on){R.on=false;R.left=(R.end-Date.now())/1000}wakeOff();go({name:"home"});return}
   if(act==="tab-history"){go({name:"history"});return}
   if(act==="open"){cur=getLog(v,today());go({name:isRun(v)?"run":"workout"});return}
   if(act==="exd"){go({name:"exercise",id:v});return}
+  if(act==="edit-day"){ED={dow:+v,sel:plan(+v).slice()};openModal(dayModal());return}
+  if(act==="toggle-day-w"){const L=USERS[user].list;ED.sel=ED.sel.includes(v)?ED.sel.filter(x=>x!==v):L.filter(x=>x===v||ED.sel.includes(x));$("#modal-in").innerHTML=dayModal();return}
+  if(act==="save-day"){sched[user]=sched[user]||{};sched[user][ED.dow]=ED.sel.slice();saveSched();closeModal();render();toast(DFULL[ED.dow]+" atualizada");return}
+  if(act==="reset-day"){if(sched[user])delete sched[user][ED.dow];saveSched();closeModal();render();toast(DFULL[ED.dow]+" voltou ao padrão");return}
   if(act==="chk"){
-    const ex=W[cur.w].ex[+b.dataset.e],si=+b.dataset.s,t=EX[ex.id].t||"kg";
+    const ex=W[cur.w].ex[+b.dataset.e],si=+b.dataset.s;
     const a=cur.sets[ex.id]=cur.sets[ex.id]||[];const s=a[si]=a[si]||{};
     if(s.ok){s.ok=false;save(cur.id);render();return}
     const row=b.parentElement,kgI=row.querySelector('[data-in="kg"]'),rI=row.querySelector('[data-in="reps"]');
     if(kgI&&(s.kg==null||s.kg==="")){const ph=parseFloat((kgI.placeholder||"").replace(",","."));s.kg=isNaN(ph)?0:ph}
     if(rI&&(s.reps==null||s.reps==="")){const ph=parseInt(rI.placeholder,10);s.reps=isNaN(ph)?0:ph}
     s.ok=true;save(cur.id);beep(1200,.06);
-    const isLast=si===ex.r.length-1;
-    render();if(ex.rest)startRest(ex.rest);
-    if(isLast&&!ex.rest)stopRest();
+    render();if(ex.rest)startRest(ex.rest);else stopRest();
     return;
   }
-  if(act==="finish"){
-    if(!hasData(cur)){toast("Conclua pelo menos uma série antes de finalizar");return}
-    cur.done=true;save(cur.id);stopRest();
-    let n=0,vol=0;Object.entries(cur.sets).forEach(([k,a])=>a.forEach(s=>{if(s&&s.ok){n++;vol+=(+s.kg||0)*(+s.reps||0)}}));
-    toast(`${W[cur.w].n} salvo: ${n} séries${vol?", "+fmt(vol)+" kg de volume":""}`);
-    const sat=new Date().getDay()===6&&cur.w==="D";
-    if(sat){cur=getLog("R3",today());go({name:"run"})}else go({name:"home"});
-    return;
-  }
+  if(act==="finish"){if(!hasData(cur)){toast("Conclua pelo menos uma série antes de finalizar");return}openFinish();return}
+  if(act==="confirm-finish"){confirmFinish();return}
   if(act==="del"){if(!confirm("Apagar o registro de "+W[cur.w].n+" de "+br(cur.date)+"?"))return;remove(cur.id);R=null;toast("Registro apagado");go({name:"home"});return}
-  if(act==="wipe"){if(!confirm("Apagar todo o histórico? Isso não pode ser desfeito."))return;Object.keys(logs).forEach(remove);toast("Histórico apagado");go({name:"history"});return}
+  if(act==="wipe"){if(!confirm("Apagar todo o histórico de "+USERS[user].n+"? Isso não pode ser desfeito."))return;mine().forEach(l=>remove(l.id));toast("Histórico apagado");go({name:"history"});return}
+  if(act==="bk-wa"){const t="Backup TURUGYM "+br(today())+" · não edite o texto abaixo\n"+backupText();
+    if(navigator.share){navigator.share({text:t}).then(()=>toast("Backup enviado"),err=>{if(err&&err.name==="AbortError")return;waLink(t)})}else waLink(t);return}
+  if(act==="bk-copy"){const t=backupText();
+    const show=()=>openModal(`<h2>Backup</h2><p>Copie todo o texto abaixo e guarde nas Notas ou no WhatsApp.</p><textarea readonly id="bk">${esc(t)}</textarea><button class="btn ghost" data-act="modal-close">Fechar</button>`);
+    try{navigator.clipboard.writeText(t).then(()=>toast("Backup copiado. Cole nas Notas ou no WhatsApp."),show)}catch(err){show()}return}
+  if(act==="bk-open"){openModal(`<h2>Restaurar backup</h2><p>Copie a mensagem do backup inteira (do WhatsApp ou das Notas) e cole aqui. Nada que você já tem é apagado: só entra o que for mais novo.</p><textarea id="bk" placeholder="Cole o backup aqui"></textarea><p class="err" id="bkErr"></p><button class="btn" data-act="bk-restore">Restaurar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
+  if(act==="bk-restore"){const r=restore($("#bk").value);if(typeof r==="string"){$("#bkErr").textContent=r;return}closeModal();render();toast(r+" registros restaurados");return}
   if(act==="rest-add"){rest.end+=(+v)*1000;if(rest.end<=Date.now())stopRest();else paintRest();return}
   if(act==="rest-skip"){stopRest();return}
   if(act==="run-toggle"){
@@ -497,11 +651,11 @@ document.addEventListener("click",e=>{
   }
   if(act==="run-skip"){if(R.i<R.ph.length){const was=R.on;runAdvance();if(R&&!was&&R.i<R.ph.length){R.left=R.ph[R.i].d}runPaint()}return}
   if(act==="feel"){cur.feel=v;save(cur.id);render();return}
-  if(act==="run-done"){cur.done=true;save(cur.id);toast("Corrida registrada");render();return}
+  if(act==="run-done"){openFinish();return}
 });
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&R&&R.on)wakeOn()});
-
 document.addEventListener("pointerdown",unlockAudio,{passive:true});
+
 lsLoad();render();cloudInit();
 </script>
 </body>
