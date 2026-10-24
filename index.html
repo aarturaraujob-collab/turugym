@@ -396,9 +396,9 @@ async function cloudInit(){
     if(view.name!=="workout"&&view.name!=="run")render();else{const e=$("#sync");if(e)e.textContent="☁︎ salvo"}
   }catch(e){}
 }
-function getLog(wid,date){
-  const id=date+"_"+wid;
-  if(!logs[id])logs[id]={id,date,w:wid,u:W[wid].u,sets:{},done:false,upd:0};
+function getLog(wid,date,u=user){
+  const id=date+"_"+wid+(W[wid].u===u?"":"_"+u);
+  if(!logs[id])logs[id]={id,date,w:wid,u,sets:{},done:false,upd:0};
   return logs[id];
 }
 function hasData(l){if(!l)return false;if(l.done)return true;return Object.values(l.sets||{}).some(a=>a.some(s=>s&&s.ok))}
@@ -461,12 +461,16 @@ function home(){
     list+=`<button class="item" data-act="open" data-v="${w}"><span class="letter${isRun(w)?" run":""}">${W[w].k}</span><div><strong>${W[w].n} <span style="color:var(--muted);font-weight:400">${W[w].s}</span></strong><small>${ld?"Última vez: "+br(ld):"Ainda não feito"}</small></div><span>›</span></button>`;
   });
   const St=stats(),Lv=lvl(St.xp),TX=(St.dx[t]||dayXP(t));
-  return hdr("TURUGYM")+`<main>${userPills()}<button class="hchip" data-act="hchip">🔥 ${St.st} ${St.st===1?"dia":"dias"} · Nível ${Lv.n} ${Lv.title} · hoje +${TX.xp} XP ›</button><div class="week">${week}</div>${card}<h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div></main>`;
+  return hdr("TURUGYM")+`<main>${userPills()}<button class="hchip" data-act="hchip">🔥 ${St.st} ${St.st===1?"dia":"dias"} · Nível ${Lv.n} ${Lv.title} · hoje +${TX.xp} XP ›</button><div class="week">${week}</div>${card}<h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div>${together()}</main>`;
+}
+function together(){
+  const o=Object.keys(USERS).find(k=>k!==user);if(!o)return"";
+  return `<h2 class="section-title" style="margin-top:20px">Treinar junto · treinos de ${USERS[o].n}</h2><p class="hint" style="margin:-4px 2px 8px">O treino fica salvo no seu perfil (${USERS[user].n}), com as suas cargas e o seu XP.</p><div class="list">`+USERS[o].list.map(w=>{const d=lastDone(w);return `<button class="item" data-act="open" data-v="${w}"><span class="letter${isRun(w)?" run":""}">${W[w].k}</span><div><strong>${W[w].n} <span style="color:var(--muted);font-weight:400">${W[w].s}</span></strong><small>${d?"Você fez em "+br(d):"Você ainda não fez"}</small></div><span>›</span></button>`}).join("")+`</div>`;
 }
 function workout(){
   const w=W[cur.w],l=cur;
-  let h=hdr(w.n,w.s+" · "+br(l.date)+" · "+USERS[w.u].n,"home")+`<main>`;
-  if(w.warm)h+=`<p class="note">${w.warm}<br><b>Progressão:</b> bateu o topo da faixa em todas as séries? Suba 2,5–5 kg no próximo treino.${w.u==="artur"?"<br><b>Até a avaliação médica:</b> pare com 2–3 reps sobrando, sem ir até a falha. Tontura? Pare, sente e beba água.":""}</p>`;
+  let h=hdr(w.n,w.s+" · "+br(l.date)+" · "+USERS[l.u||w.u].n,"home")+`<main>`;
+  if(w.warm)h+=`<p class="note">${w.warm}<br><b>Progressão:</b> bateu o topo da faixa em todas as séries? Suba 2,5–5 kg no próximo treino.${(l.u||w.u)==="artur"?"<br><b>Até a avaliação médica:</b> pare com 2–3 reps sobrando, sem ir até a falha. Tontura? Pare, sente e beba água.":""}</p>`;
   w.ex.forEach((e,ei)=>{
     const ex=EX[e.id],t=ex.t||"kg",sets=l.sets[e.id]||[],prev=prevSets(e.id,l.id);
     const restTxt=e.rest?(e.rest>=60&&e.rest%60===0?e.rest/60+" min":e.rest+"s"):"sem descanso";
@@ -508,7 +512,7 @@ function runView(){
   let steps="";R.ph.forEach((p,i)=>{steps+=`<i class="${p.z===3?"z3":""}${i<R.i?" past":""}${i===R.i?" cur":""}" style="flex:${p.d}"></i>`});
   const feel=["Fácil","Ok","Pesado"].map(f=>`<button class="${l.feel===f?"on":""}" data-act="feel" data-v="${f}">${f}</button>`).join("");
   const note=w.note||"Faça o aquecimento dinâmico antes. Rápido = Z3 (70–79% FCmáx, conversa com dificuldade). Leve = Z1 (dá pra conversar).";
-  return hdr(w.n,w.s+" · "+br(l.date)+" · "+USERS[w.u].n,"home")+`<main>
+  return hdr(w.n,w.s+" · "+br(l.date)+" · "+USERS[l.u||w.u].n,"home")+`<main>
   <p class="note">${note}</p>
   <div class="phase" id="ph"><div class="label" id="phL"></div><div class="clock" id="phC"></div><div class="next" id="phN"></div></div>
   ${R.ph.length>1?`<div class="steps" id="steps">${steps}</div>`:`<div class="steps" id="steps" style="display:none">${steps}</div>`}
