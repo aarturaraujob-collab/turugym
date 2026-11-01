@@ -156,6 +156,10 @@ button.day{font:inherit;width:100%}
 .chips button.on{border-color:var(--pri-text);background:var(--soft);font-weight:600}
 .chips button.on::after{content:"✓";margin-left:auto;color:var(--pri-text)}
 .row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.setlbl{font-size:12px;color:var(--muted);font-weight:700;margin:10px 2px -2px;text-transform:uppercase;letter-spacing:.04em}
+.who{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:800 15px "Saira Condensed",sans-serif;margin:0 auto;font-style:normal}
+.who0{background:var(--pri);color:var(--pri-ink)}.who1{background:var(--frost);color:#0A1319}.who2{background:var(--amber-soft);color:var(--amber)}.who3{background:var(--soft);color:var(--pri-text)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px}.legend span{display:flex;align-items:center;gap:6px;font-weight:600}.legend .who{margin:0;width:26px;height:26px}
 .users .uadd{flex:0 0 44px;font-size:22px;color:var(--pri-text)}
 .item.rank{padding:14px}.item.rank.top{border-color:var(--pri-text);background:var(--soft)}
 .medal{font-size:28px;width:40px;text-align:center;flex:none;font-weight:700}
@@ -455,6 +459,7 @@ function render(){
   else if(view.name==="diet")app.innerHTML=dietView();
   else if(view.name==="health")app.innerHTML=healthView();
   else if(view.name==="rank")app.innerHTML=rankView();
+  else if(view.name==="gworkout")app.innerHTML=gworkout();
   xpCheck();
 }
 function hdr(title,sub,back){
@@ -488,7 +493,7 @@ function home(){
     list+=`<button class="item" data-act="open" data-v="${w}"><span class="letter${isRun(w)?" run":""}">${W[w].k}</span><div><strong>${W[w].n} <span style="color:var(--muted);font-weight:400">${W[w].s}</span></strong><small>${ld?"Última vez: "+br(ld):"Ainda não feito"}</small></div><span>›</span></button>`;
   });
   const St=stats(),Lv=lvl(St.xp),TX=(St.dx[t]||dayXP(t));
-  return hdr("TURUGYM")+`<main>${userPills()}${new Date().getDay()===1?`<button class="hchip" data-act="tab" data-v="health">📊 O resumo da semana passada chegou ›</button>`:""}<button class="hchip" data-act="hchip">🔥 ${St.st} ${St.st===1?"dia":"dias"} · Nível ${Lv.n} ${Lv.title} · hoje +${TX.xp} XP ›</button><div class="week">${week}</div>${card}<h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div>${together()}</main>`;
+  return hdr("TURUGYM")+`<main>${userPills()}${new Date().getDay()===1?`<button class="hchip" data-act="tab" data-v="health">📊 O resumo da semana passada chegou ›</button>`:""}<button class="hchip" data-act="hchip">🔥 ${St.st} ${St.st===1?"dia":"dias"} · Nível ${Lv.n} ${Lv.title} · hoje +${TX.xp} XP ›</button><div class="week">${week}</div>${card}<button class="btn ghost" data-act="g-open" style="margin:0 0 18px">👥 Treinar junto (mesma tela)</button><h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div>${together()}</main>`;
 }
 function together(){
   const o=["artur","laila"].find(k=>k!==user&&USERS[k].list!==USERS[user].list);if(!o)return"";
@@ -932,6 +937,54 @@ function rankView(){
 }
 function addUserModal(){openModal(`<h2>Adicionar pessoa</h2><p>O nome também é a "senha" para finalizar os treinos dela.</p><label class="lbl">Nome</label><input id="uName" autocapitalize="words" placeholder="Ex.: Pedro"><label class="lbl">Começar com o plano de</label><select id="uBase"><option value="artur">Artur</option><option value="laila">Laila</option></select><p class="hint">Depois dá para pedir no Claude um plano só dela, e o histórico continua.</p><p class="err" id="uErr"></p><button class="btn" data-act="u-save">Adicionar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`)}
 
+/* ---------- treinar junto (mesma tela) ---------- */
+let grp=null,GSEL=[],GW=null;
+function gModal(){
+  const opts=["artur","laila"].map(o=>USERS[o].list.filter(w=>!isRun(w)).map(w=>`<button class="item check${GW===w?" on":""}" data-act="g-w" data-v="${w}"><span class="box">${GW===w?"✓":""}</span><div><strong>${W[w].n} · ${USERS[o].n}</strong><small>${W[w].s}</small></div></button>`).join("")).join("");
+  openModal(`<h2>Treinar junto</h2><p>Quem vai treinar?</p><div class="chips2">${Object.keys(USERS).map(k=>`<button class="${GSEL.includes(k)?"on":""}" data-act="g-who" data-v="${k}">${esc(USERS[k].n)}</button>`).join("")}</div><p style="margin-top:14px">Qual treino?</p><div class="list">${opts}</div><p class="err" id="gErr"></p><button class="btn" data-act="g-start">Começar juntos</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);
+}
+function gworkout(){
+  const w=W[grp.w],U=grp.users;
+  let h=hdr(w.n+" · juntos",w.s+" · "+U.map(u=>USERS[u].n).join(" + "),"home")+`<main>`;
+  h+=`<p class="note">${w.warm?w.warm+"<br>":""}Cada série aparece para cada um, na ordem do revezamento. As cargas e o histórico são de cada pessoa.</p>`;
+  h+=`<div class="legend">${U.map((u,i)=>`<span><i class="who who${i}">${esc(USERS[u].n[0])}</i>${esc(USERS[u].n)}</span>`).join("")}</div>`;
+  w.ex.forEach((e,ei)=>{
+    const ex=EX[e.id],t=ex.t||"kg";
+    const restTxt=e.rest?(e.rest>=60&&e.rest%60===0?e.rest/60+" min":e.rest+"s"):"sem descanso";
+    const nums=e.rg?e.r.length+"×"+e.rg:(e.r.every(x=>x===e.r[0])?e.r.length+"×"+e.r[0]:e.r.join("-"));
+    h+=`<section class="ex"><div class="ex-head"><h3>${ex.n}</h3><span class="meta">${nums} · ${restTxt}</span></div>`;
+    if(e.tag)h+=`<div class="tag">${e.tag}</div>`;
+    const cls=t==="kg"?"grid":t==="bw"?"grid nokg":"grid time";
+    h+=`<div class="${cls}"><span class="gh">Quem</span><span class="gh l">Anterior</span>${t==="kg"?`<span class="gh">${e.h?"kg cada":"kg"}</span>`:""}${t!=="time"?'<span class="gh">Reps</span>':""}<span class="gh">✓</span></div>`;
+    e.r.forEach((target,si)=>{
+      h+=`<div class="setlbl">Série ${si+1}</div>`;
+      U.forEach((u,ui)=>{
+        const l=grp.logs[u],s=(l.sets[e.id]||[])[si]||{},prev=asUser(u,()=>prevSets(e.id,l.id)),p=prev&&prev[si]&&prev[si].ok?prev[si]:null;
+        const sg=u===w.u&&e.sug!=null?(Array.isArray(e.sug)?e.sug[si]:e.sug):null;
+        let prevTxt=p?(t==="kg"?fmt(p.kg||0)+" × "+p.reps:t==="bw"?p.reps+" reps":"feito"):(sg!=null&&t==="kg"?"sugerido":"—");
+        if(t==="time")prevTxt=target;
+        const repPh=p&&p.reps!=null?p.reps:target;
+        h+=`<div class="${cls}${s.ok?" row-done":""}"><span class="who who${ui}" title="${esc(USERS[u].n)}">${esc(USERS[u].n[0])}</span><span class="prev">${prevTxt}</span>`;
+        if(t==="kg")h+=`<input inputmode="decimal" aria-label="Carga de ${esc(USERS[u].n)} série ${si+1}" data-gin="kg" data-u="${u}" data-e="${ei}" data-s="${si}" value="${s.kg??""}" placeholder="${p&&p.kg!=null?fmt(p.kg):sg!=null?fmt(sg):"kg"}">`;
+        if(t!=="time")h+=`<input inputmode="numeric" aria-label="Reps de ${esc(USERS[u].n)} série ${si+1}" data-gin="reps" data-u="${u}" data-e="${ei}" data-s="${si}" value="${s.reps??""}" placeholder="${repPh}">`;
+        h+=`<button class="chk${s.ok?" on":""}" data-act="gchk" data-u="${u}" data-e="${ei}" data-s="${si}" aria-label="Concluir série ${si+1} de ${esc(USERS[u].n)}">✓</button></div>`;
+      });
+    });
+    h+=`</section>`;
+  });
+  h+=`<button class="btn" data-act="gfinish">Finalizar treino de todos</button>`;
+  return h+`</main>`;
+}
+function gConfirm(){
+  const need=grp.users.filter(u=>hasData(grp.logs[u]));
+  const got=[...document.querySelectorAll("[data-who]")].map(i=>ukey(i.value)).filter(Boolean);
+  const ok=need.every(u=>got.includes(u))&&got.every(g=>need.includes(g));
+  if(!ok){$("#whoErr").textContent="Os nomes não conferem com quem treinou.";return}
+  closeModal();stopRest();
+  need.forEach(u=>{const l=grp.logs[u];l.done=true;l.by=u;save(l.id)});
+  toast(W[grp.w].n+" salvo para "+need.map(u=>USERS[u].n).join(" e ")+" 💪");grp=null;go({name:"home"});
+}
+
 /* ---------- sync GitHub ---------- */
 const GH={owner:"aarturaraujob-collab",repo:"turugym",path:"data/turugym.json",branch:"main"};
 const LSG="th_gh_token",LSDEAD="th_dead_v1";
@@ -951,7 +1004,7 @@ async function ghPull(){
   if(!r.ok)throw new Error("HTTP "+r.status);
   const j=await r.json();ghSha=j.sha;const txt=b64d(j.content||"");
   let obj=null;try{obj=JSON.parse(txt)}catch(e){}
-  if(obj){const before=canon(JSON.parse(backupText()));restore(txt);const after=canon(JSON.parse(backupText()));if(before!==after&&view.name!=="workout"&&view.name!=="run")render()}
+  if(obj){const before=canon(JSON.parse(backupText()));restore(txt);const after=canon(JSON.parse(backupText()));if(before!==after&&view.name!=="workout"&&view.name!=="run"&&view.name!=="gworkout")render()}
   return obj;
 }
 async function ghPush(){
@@ -997,7 +1050,8 @@ async function ghConnect(){
 
 /* ---------- eventos ---------- */
 document.addEventListener("input",e=>{
-  const el=e.target;if(el.id==="symNote"){const s=symOf(today());hsave("s|"+user+"|"+today(),{list:s.list,note:el.value});return}
+  const el=e.target;if(el.dataset&&el.dataset.gin&&grp){const l=grp.logs[el.dataset.u],ex=W[grp.w].ex[+el.dataset.e],si=+el.dataset.s;const a=l.sets[ex.id]=l.sets[ex.id]||[];a[si]=a[si]||{};const v=el.value.replace(",",".");a[si][el.dataset.gin]=v===""?null:+v;if(a[si].ok)save(l.id);return}
+  if(el.id==="symNote"){const s=symOf(today());hsave("s|"+user+"|"+today(),{list:s.list,note:el.value});return}
   if(el.id==="sleepIn"){const d=dget();const x=parseFloat(el.value.replace(",","."));d.sl=isNaN(x)?null:x;dsave();return}
   if(!el.dataset||!el.dataset.in||!cur)return;
   const ex=W[cur.w].ex[+el.dataset.e],si=+el.dataset.s;
@@ -1016,6 +1070,19 @@ document.addEventListener("click",e=>{
   if(act==="gh-save"){ghConnect();return}
   if(act==="gh-sync"){ghDirty=true;ghSync().then(render);return}
   if(act==="gh-off"){if(!confirm("Desconectar o GitHub neste celular? Os dados continuam salvos no repositório."))return;ghTok=null;ghState="off";try{localStorage.removeItem(LSG)}catch(e){}render();return}
+  if(act==="g-open"){GSEL=[user];const pl=plan(new Date().getDay()).filter(w=>!isRun(w));GW=pl[0]||USERS[user].list.find(w=>!isRun(w));gModal();return}
+  if(act==="g-who"){GSEL=GSEL.includes(v)?GSEL.filter(x=>x!==v):[...GSEL,v];gModal();return}
+  if(act==="g-w"){GW=v;gModal();return}
+  if(act==="g-start"){if(GSEL.length<2){$("#gErr").textContent="Escolha pelo menos 2 pessoas.";return}if(!GW){$("#gErr").textContent="Escolha o treino.";return}const t=today();grp={w:GW,users:Object.keys(USERS).filter(k=>GSEL.includes(k)),logs:{}};grp.users.forEach(u=>grp.logs[u]=getLog(GW,t,u));closeModal();go({name:"gworkout"});return}
+  if(act==="gchk"){const u=b.dataset.u,l=grp.logs[u],ex=W[grp.w].ex[+b.dataset.e],si=+b.dataset.s;const a=l.sets[ex.id]=l.sets[ex.id]||[];const s=a[si]=a[si]||{};
+    if(s.ok){s.ok=false;save(l.id);render();return}
+    const row=b.parentElement,kgI=row.querySelector('[data-gin="kg"]'),rI=row.querySelector('[data-gin="reps"]');
+    if(kgI&&(s.kg==null||s.kg==="")){const ph=parseFloat((kgI.placeholder||"").replace(",","."));s.kg=isNaN(ph)?0:ph}
+    if(rI&&(s.reps==null||s.reps==="")){const ph=parseInt(rI.placeholder,10);s.reps=isNaN(ph)?0:ph}
+    s.ok=true;save(l.id);beep(1200,.06);render();
+    const lastU=grp.users[grp.users.length-1];if(ex.rest&&u===lastU)startRest(ex.rest);return}
+  if(act==="gfinish"){const need=grp.users.filter(u=>hasData(grp.logs[u]));if(!need.length){toast("Conclua pelo menos uma série antes de finalizar");return}openModal(`<h2>Finalizar</h2><p>Cada um digita o próprio nome para confirmar.</p>${need.map((u,i)=>`<input data-who="${i}" autocomplete="off" autocapitalize="words" placeholder="Nome ${i+1}" style="margin-bottom:8px">`).join("")}<p class="err" id="whoErr"></p><button class="btn" data-act="g-confirm">Confirmar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
+  if(act==="g-confirm"){gConfirm();return}
   if(act==="rank-mode"){rankMode=v;render();return}
   if(act==="u-add"){addUserModal();return}
   if(act==="u-save"){const n=($("#uName").value||"").trim(),k=ukey(n);if(!k){$("#uErr").textContent="Digite um nome.";return}if(USERS[k]){$("#uErr").textContent="Já existe alguém com esse nome.";return}hsave("user|"+k,{n,base:$("#uBase").value});loadDynUsers();user=k;try{localStorage.setItem(LSU,k)}catch(e){}closeModal();R=null;render();toast(n+" entrou no TURUGYM 🐊");return}
