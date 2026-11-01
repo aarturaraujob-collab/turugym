@@ -156,6 +156,13 @@ button.day{font:inherit;width:100%}
 .chips button.on{border-color:var(--pri-text);background:var(--soft);font-weight:600}
 .chips button.on::after{content:"✓";margin-left:auto;color:var(--pri-text)}
 .row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grest{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:6;padding:0 12px 8px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.grest .rest-in{pointer-events:auto;width:100%}
+.grest .rest-in .who{margin:0;flex:none}
+.tgt{display:block;font-size:11px;color:var(--muted);opacity:.85}
+.grid .prev{white-space:normal;line-height:1.2}
+.grest .rest-in{padding:6px 10px;border-radius:12px}.grest .rest-in .t{font-size:22px}.grest .rest-in .t small{font-size:12px;margin-top:-2px}.grest .rest-in button{padding:7px 10px;font-size:14px}
+main{padding-bottom:200px}
 .setlbl{font-size:12px;color:var(--muted);font-weight:700;margin:10px 2px -2px;text-transform:uppercase;letter-spacing:.04em}
 .who{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:800 15px "Saira Condensed",sans-serif;margin:0 auto;font-style:normal}
 .who0{background:var(--pri);color:var(--pri-ink)}.who1{background:var(--frost);color:#0A1319}.who2{background:var(--amber-soft);color:var(--amber)}.who3{background:var(--soft);color:var(--pri-text)}
@@ -230,6 +237,7 @@ button.day{font:inherit;width:100%}
 </head>
 <body>
 <div id="app"></div>
+<div class="grest" id="grest"></div>
 <div class="rest" id="rest"><div class="rest-in">
   <div class="t" id="restT">0:00<small>Descanso</small></div>
   <button data-act="rest-add" data-v="-15">−15s</button>
@@ -584,6 +592,7 @@ function paintRest(){const left=(rest.end-Date.now())/1000;$("#restT").innerHTML
 function stopRest(){rest.end=0;$("#rest").classList.remove("show");if(!(R&&R.on))wakeOff()}
 setInterval(()=>{
   if(rest.end){const l=(rest.end-Date.now())/1000;if(l<=0){stopRest();alarm("Bora, próxima série!")}else{const c=Math.ceil(l);if(c<=3&&c!==rest.tick){rest.tick=c;beep(660,.08,60)}paintRest()}}
+  Object.keys(gRest).forEach(u=>{const r=gRest[u],l=(r.end-Date.now())/1000;if(l<=0){delete gRest[u];alarm((USERS[u]?USERS[u].n:"")+": bora, próxima série!")}else{const c=Math.ceil(l);if(c<=3&&c!==r.tick){r.tick=c;beep(660,.08,60)}}});if(Object.keys(gRest).length||$("#grest").childElementCount)paintG();
   if(R&&R.on){if(Date.now()>=R.end)runAdvance();else{const c=Math.ceil((R.end-Date.now())/1000);if(c<=3&&c!==R.tick){R.tick=c;beep(660,.08,60)}}runPaint()}
 },250);
 
@@ -937,6 +946,11 @@ function rankView(){
 }
 function addUserModal(){openModal(`<h2>Adicionar pessoa</h2><p>O nome também é a "senha" para finalizar os treinos dela.</p><label class="lbl">Nome</label><input id="uName" autocapitalize="words" placeholder="Ex.: Pedro"><label class="lbl">Começar com o plano de</label><select id="uBase"><option value="artur">Artur</option><option value="laila">Laila</option></select><p class="hint">Depois dá para pedir no Claude um plano só dela, e o histórico continua.</p><p class="err" id="uErr"></p><button class="btn" data-act="u-save">Adicionar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`)}
 
+
+let gRest={};
+function personRx(u,exId,e){for(const w of USERS[u].list){const x=W[w]&&W[w].ex&&W[w].ex.find(z=>z.id===exId);if(x)return x}return e}
+function gStart(u,sec){gRest[u]={end:Date.now()+sec*1000,tick:0};wakeOn();askNotif();paintG()}
+function paintG(){const el=$("#grest");if(!el)return;const U=grp?grp.users:Object.keys(gRest);el.innerHTML=Object.keys(gRest).map(u=>{const ui=Math.max(0,U.indexOf(u)),l=(gRest[u].end-Date.now())/1000;return`<div class="rest-in"><i class="who who${ui}">${esc((USERS[u]||{n:"?"}).n[0])}</i><div class="t">${mmss(l)}<small>Descanso de ${esc((USERS[u]||{n:""}).n)}</small></div><button data-act="g-rest-add" data-u="${u}" data-v="15">+15s</button><button data-act="g-rest-skip" data-u="${u}">Pular</button></div>`}).join("");if(!Object.keys(gRest).length&&!(R&&R.on)&&!rest.end)wakeOff()}
 /* ---------- treinar junto (mesma tela) ---------- */
 let grp=null,GSEL=[],GW=null;
 function gModal(){
@@ -946,7 +960,7 @@ function gModal(){
 function gworkout(){
   const w=W[grp.w],U=grp.users;
   let h=hdr(w.n+" · juntos",w.s+" · "+U.map(u=>USERS[u].n).join(" + "),"home")+`<main>`;
-  h+=`<p class="note">${w.warm?w.warm+"<br>":""}Cada série aparece para cada um, na ordem do revezamento. As cargas e o histórico são de cada pessoa.</p>`;
+  h+=`<p class="note">${w.warm?w.warm+"<br>":""}Cada série aparece para cada um, na ordem do revezamento. Carga, meta de reps e descanso são de cada pessoa: se o exercício existe no plano dela, vale o dela. Cada um tem o próprio cronômetro.</p>`;
   h+=`<div class="legend">${U.map((u,i)=>`<span><i class="who who${i}">${esc(USERS[u].n[0])}</i>${esc(USERS[u].n)}</span>`).join("")}</div>`;
   w.ex.forEach((e,ei)=>{
     const ex=EX[e.id],t=ex.t||"kg";
@@ -960,11 +974,13 @@ function gworkout(){
       h+=`<div class="setlbl">Série ${si+1}</div>`;
       U.forEach((u,ui)=>{
         const l=grp.logs[u],s=(l.sets[e.id]||[])[si]||{},prev=asUser(u,()=>prevSets(e.id,l.id)),p=prev&&prev[si]&&prev[si].ok?prev[si]:null;
-        const sg=u===w.u&&e.sug!=null?(Array.isArray(e.sug)?e.sug[si]:e.sug):null;
+        const rx=personRx(u,e.id,e),tg=rx.r[Math.min(si,rx.r.length-1)];
+        const sg=rx.sug!=null?(Array.isArray(rx.sug)?rx.sug[Math.min(si,rx.sug.length-1)]:rx.sug):null;
         let prevTxt=p?(t==="kg"?fmt(p.kg||0)+" × "+p.reps:t==="bw"?p.reps+" reps":"feito"):(sg!=null&&t==="kg"?"sugerido":"—");
-        if(t==="time")prevTxt=target;
-        const repPh=p&&p.reps!=null?p.reps:target;
-        h+=`<div class="${cls}${s.ok?" row-done":""}"><span class="who who${ui}" title="${esc(USERS[u].n)}">${esc(USERS[u].n[0])}</span><span class="prev">${prevTxt}</span>`;
+        if(t==="time")prevTxt=tg;
+        const repPh=p&&p.reps!=null?p.reps:tg;
+        const rT=rx.rest?(rx.rest>=60&&rx.rest%60===0?rx.rest/60+" min":rx.rest+"s"):"sem desc.";
+        h+=`<div class="${cls}${s.ok?" row-done":""}"><span class="who who${ui}" title="${esc(USERS[u].n)}">${esc(USERS[u].n[0])}</span><span class="prev">${prevTxt}<small class="tgt">meta ${rx.rg||tg} · ${rT}</small></span>`;
         if(t==="kg")h+=`<input inputmode="decimal" aria-label="Carga de ${esc(USERS[u].n)} série ${si+1}" data-gin="kg" data-u="${u}" data-e="${ei}" data-s="${si}" value="${s.kg??""}" placeholder="${p&&p.kg!=null?fmt(p.kg):sg!=null?fmt(sg):"kg"}">`;
         if(t!=="time")h+=`<input inputmode="numeric" aria-label="Reps de ${esc(USERS[u].n)} série ${si+1}" data-gin="reps" data-u="${u}" data-e="${ei}" data-s="${si}" value="${s.reps??""}" placeholder="${repPh}">`;
         h+=`<button class="chk${s.ok?" on":""}" data-act="gchk" data-u="${u}" data-e="${ei}" data-s="${si}" aria-label="Concluir série ${si+1} de ${esc(USERS[u].n)}">✓</button></div>`;
@@ -980,7 +996,7 @@ function gConfirm(){
   const got=[...document.querySelectorAll("[data-who]")].map(i=>ukey(i.value)).filter(Boolean);
   const ok=need.every(u=>got.includes(u))&&got.every(g=>need.includes(g));
   if(!ok){$("#whoErr").textContent="Os nomes não conferem com quem treinou.";return}
-  closeModal();stopRest();
+  closeModal();stopRest();gRest={};paintG();
   need.forEach(u=>{const l=grp.logs[u];l.done=true;l.by=u;save(l.id)});
   toast(W[grp.w].n+" salvo para "+need.map(u=>USERS[u].n).join(" e ")+" 💪");grp=null;go({name:"home"});
 }
@@ -1080,7 +1096,7 @@ document.addEventListener("click",e=>{
     if(kgI&&(s.kg==null||s.kg==="")){const ph=parseFloat((kgI.placeholder||"").replace(",","."));s.kg=isNaN(ph)?0:ph}
     if(rI&&(s.reps==null||s.reps==="")){const ph=parseInt(rI.placeholder,10);s.reps=isNaN(ph)?0:ph}
     s.ok=true;save(l.id);beep(1200,.06);render();
-    const lastU=grp.users[grp.users.length-1];if(ex.rest&&u===lastU)startRest(ex.rest);return}
+    const rx=personRx(u,ex.id,ex);if(rx.rest)gStart(u,rx.rest);return}
   if(act==="gfinish"){const need=grp.users.filter(u=>hasData(grp.logs[u]));if(!need.length){toast("Conclua pelo menos uma série antes de finalizar");return}openModal(`<h2>Finalizar</h2><p>Cada um digita o próprio nome para confirmar.</p>${need.map((u,i)=>`<input data-who="${i}" autocomplete="off" autocapitalize="words" placeholder="Nome ${i+1}" style="margin-bottom:8px">`).join("")}<p class="err" id="whoErr"></p><button class="btn" data-act="g-confirm">Confirmar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
   if(act==="g-confirm"){gConfirm();return}
   if(act==="rank-mode"){rankMode=v;render();return}
@@ -1107,7 +1123,9 @@ document.addEventListener("click",e=>{
   if(act==="diet-w"){const d=dget();d.w=Math.max(0,d.w+(+v));dsave();render();return}
   if(act==="user"){if(v===user)return;user=v;try{localStorage.setItem(LSU,v)}catch(e){}selDow=null;R=null;render();toast("Perfil: "+USERS[v].n);return}
   if(act==="day"){selDow=+v;render();return}
-  if(act==="home"){if(R&&R.on){R.on=false;R.left=(R.end-Date.now())/1000}wakeOff();go({name:"home"});return}
+  if(act==="g-rest-add"){const r=gRest[b.dataset.u];if(r){r.end+=(+v)*1000;if(r.end<=Date.now())delete gRest[b.dataset.u]}paintG();return}
+  if(act==="g-rest-skip"){delete gRest[b.dataset.u];paintG();return}
+  if(act==="home"){gRest={};paintG();if(R&&R.on){R.on=false;R.left=(R.end-Date.now())/1000}wakeOff();go({name:"home"});return}
   if(act==="tab-history"){go({name:"history"});return}
   if(act==="open"){cur=getLog(v,today());go({name:isRun(v)?"run":"workout"});return}
   if(act==="exd"){go({name:"exercise",id:v});return}
