@@ -303,7 +303,7 @@ const W={
     {id:"tricorda",r:[12,12,12],rg:"10–12",rest:60,sug:25},
     {id:"testa",r:[12,12,12],rg:"10–12",rest:60,sug:27.5}]},
   B:{u:"artur",k:"B",n:"Treino B",s:"Costas + bíceps",warm:"Mobilidade de ombro + 2 séries leves na puxada. Use strap nas puxadas e remadas se o pulso reclamar.",ex:[
-    {id:"puxtri",r:[8,8,8,8],rg:"6–8",rest:120,sug:60,tag:"Principal do dia. Deixe 2–3 reps no tanque."},
+    {id:"puxtri",r:[8,8,8,8],rg:"6–8",rest:120,sug:60,tag:"Principal do dia. Deixe 1–2 reps no tanque."},
     {id:"remm",r:[10,10,10,10],rg:"8–10",rest:90,sug:45},
     {id:"puxab",r:[12,12,12],rg:"10–12",rest:90,sug:55,tag:"Pegada aberta: foco na largura das costas"},
     {id:"roscaw",r:[10,10,10],rg:"8–10",rest:75,sug:25,tag:"Carga total com a barra"},
@@ -320,7 +320,8 @@ const W={
     {id:"thrust",r:[10,10,10],rg:"8–10",rest:90,sug:60,tag:"No smith ou na máquina de glúteo. As mãos só estabilizam."},
     {id:"mesa",r:[12,12,12],rg:"10–12",rest:75,sug:40,tag:"Sem mesa: cadeira flexora"},
     {id:"ext",r:[15,15,15],rg:"12–15",rest:60,sug:75}]},
-  R1:{u:"artur",k:"Z2",ico:"🏃",n:"Cardio Z2 40 min",s:"Trote leve ou caminhada inclinada",phases:[{z:1,d:300,l:"Aquecimento leve"},{z:2,d:1800,l:"Z2 contínuo"},{z:1,d:300,l:"Desaquecimento"}],note:ZNOTE},
+  R1:{u:"artur",k:"1:1",ico:"🏃",n:"Tiros 1:1",s:"7× (1 min forte + 1 min leve)",run:[60,60]},
+  R4:{u:"artur",k:"2:1",ico:"🏃",n:"Tiros 2:1",s:"6× (2 min forte + 1 min leve)",phases:[{z:1,d:300,l:"Aquecimento leve"},...[1,2,3,4,5,6].flatMap(k=>[{z:3,d:120,l:"Rápido",k},{z:1,d:60,l:"Leve",k}]),{z:1,d:300,l:"Desaquecimento leve"}]},
   R2:{u:"artur",k:"1:2",ico:"🏃",n:"Corrida 1:2 (pausada)",s:"Volta quando o médico liberar",run:[45,90]},
   R3:{u:"artur",k:"Z2",ico:"🏃",n:"Cardio Z2 25 min",s:"Depois do treino de perna",phases:[{z:1,d:180,l:"Aquecimento leve"},{z:2,d:1200,l:"Z2 contínuo"},{z:1,d:120,l:"Desaquecimento"}],note:ZNOTE},
   RW:{u:"artur",k:"🚶",ico:"🚶",n:"Caminhada 40 min",s:"Z2, ritmo de conversa",phases:[{z:2,d:2400,l:"Caminhada Z2"}],note:ZNOTE},
@@ -367,7 +368,7 @@ const W={
     {id:"prancha",r:["20–40s","20–40s","20–40s"],rest:40}]}
 };
 const USERS={
-  artur:{n:"Artur",list:["A","B","C","D","R1","R3","RW"],def:{0:["RW"],1:["A"],2:["R1"],3:["B"],4:["R1"],5:["C"],6:["D","R3"]}},
+  artur:{n:"Artur",list:["A","B","C","D","R1","R4","R3","RW"],def:{0:["RW"],1:["A"],2:["R1"],3:["B"],4:["R4"],5:["C"],6:["D","R3"]}},
   laila:{n:"Laila",list:["LA","LB","LC","LD","LK1","LK2","LAB1","LAB2"],def:{0:["LA"],1:["LB"],2:["LK1","LAB1"],3:[],4:["LC"],5:["LD"],6:["LK2","LAB2"]}}
 };
 const DN=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
@@ -522,7 +523,7 @@ function together(){
 function workout(){
   const w=W[cur.w],l=cur;
   let h=hdr(w.n,w.s+" · "+br(l.date)+" · "+USERS[l.u||w.u].n,"home")+`<main>`;
-  if(w.warm)h+=`<p class="note">${w.warm}<br><b>Progressão:</b> bateu o topo da faixa em todas as séries? Suba 2,5–5 kg no próximo treino.${(l.u||w.u)==="artur"?"<br><b>Até a avaliação médica:</b> pare com 2–3 reps sobrando, sem ir até a falha. Tontura? Pare, sente e beba água.":""}</p>`;
+  if(w.warm)h+=`<p class="note">${w.warm}<br><b>Progressão:</b> bateu o topo da faixa em todas as séries? Suba 2,5–5 kg no próximo treino.</p>`;
   w.ex.forEach((e,ei)=>{
     const ex=EX[e.id],t=ex.t||"kg",sets=l.sets[e.id]||[],prev=prevSets(e.id,l.id);
     const restTxt=e.rest?(e.rest>=60&&e.rest%60===0?e.rest/60+" min":e.rest+"s"):"sem descanso";
@@ -581,7 +582,7 @@ function runPaint(){
   const ph=$("#ph");if(!ph)return;
   ph.classList.toggle("z3",!!p&&p.z===3);
   if(!p){$("#phL").textContent="Concluído";$("#phC").textContent="✓";$("#phN").textContent="Toque em finalizar para salvar.";$("#runBtn").textContent="Recomeçar";return}
-  $("#phL").textContent=p.l+(p.k?` · tiro ${p.k}/7`:"")+(p.z?" · Z"+p.z:"");
+  $("#phL").textContent=p.l+(p.k?` · tiro ${p.k}/${Math.max(...R.ph.map(x=>x.k||0))}`:"")+(p.z?" · Z"+p.z:"");
   $("#phC").textContent=mmss(left);
   const n=R.ph[R.i+1];$("#phN").textContent=n?"Depois: "+n.l.toLowerCase()+" "+mmss(n.d):(R.ph.length>1?"Última etapa":"");
   $("#runBtn").textContent=R.on?"Pausar":(R.i===0&&R.left===R.ph[0].d?"Começar":"Continuar");
