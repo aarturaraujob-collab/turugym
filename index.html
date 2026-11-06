@@ -161,6 +161,13 @@ button.day{font:inherit;width:100%}
 .chips button.on{border-color:var(--pri-text);background:var(--soft);font-weight:600}
 .chips button.on::after{content:"✓";margin-left:auto;color:var(--pri-text)}
 .row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bet{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--pri);color:var(--pri-ink);border-radius:16px;padding:14px;margin:0 0 10px}
+.bet small{display:block;font-size:13px;opacity:.85}.bet b{display:block;font:800 20px "Saira Condensed",sans-serif;line-height:1.15;margin:2px 0}
+.bet .btn{background:var(--pri-ink);color:var(--pri);border:0;flex:none}
+.cline{display:grid;grid-template-columns:62px 1fr 44px;gap:8px;align-items:center;font-size:13px;margin-top:4px}.cline .gbar{margin:0}.cline span:last-child{text-align:right;font-weight:600}
+.item.feed{align-items:flex-start}.item.feed b{font-weight:700}
+.reacts{display:flex;gap:6px;margin-top:6px}.reacts button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 10px;font-size:15px}
+.reacts button.on{border-color:var(--pri-text);background:var(--soft);font-weight:700}
 .grest{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:6;padding:0 12px 8px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 .grest .rest-in{pointer-events:auto;width:100%}
 .grest .rest-in .who{margin:0;flex:none}
@@ -941,6 +948,30 @@ function monthStats(ym){
   for(let mo=monOf(first);mo<=last;mo=addDays(mo,7))if(mo>=first&&mo<=end)weekGoals(mo).forEach(g=>{if(g.done)xp+=g.xp});
   return{xp,ck:ck.size};
 }
+
+const REACTS=["🔥","👏","🐊","💪"];
+function ago(ts){const m=Math.round((Date.now()-ts)/6e4);if(m<1)return"agora";if(m<60)return"há "+m+" min";const h=Math.round(m/60);if(h<24)return"há "+h+" h";const d=Math.round(h/24);return d===1?"ontem":"há "+d+" dias"}
+function feedItems(){
+  const since=addDays(today(),-14),out=[];
+  Object.values(logs).forEach(l=>{if(!l||l.date<since||!W[l.w]||!USERS[l.u]||!hasData(l))return;
+    const n=USERS[l.u].n;
+    if(isRun(l.w)){if(l.done)out.push({id:l.id,ts:l.upd||0,ico:"🏃",u:l.u,txt:`<b>${esc(n)}</b> completou ${esc(W[l.w].n)}${l.feel?" · achou "+l.feel.toLowerCase():""}`});return}
+    let sets=0,vol=0;Object.values(l.sets||{}).forEach(a=>a.forEach(s=>{if(s&&s.ok){sets++;vol+=(+s.kg||0)*(+s.reps||0)}}));
+    const mates=Object.values(logs).filter(o=>o!==l&&o.date===l.date&&o.w===l.w&&hasData(o)&&USERS[o.u]).map(o=>USERS[o.u].n);
+    out.push({id:l.id,ts:l.upd||0,ico:"🏋️",u:l.u,txt:`<b>${esc(n)}</b> ${l.done?"terminou":"está fazendo"} o ${esc(W[l.w].n)}${mates.length?" junto com "+mates.map(esc).join(" e "):""} · ${sets} ${sets===1?"série":"séries"}${vol?" · "+fmt(vol)+" kg de volume":""}`});
+  });
+  Object.keys(USERS).forEach(k=>asUser(k,()=>{for(let i=0;i<14;i++){const d=addDays(today(),-i);if(dayXP(d).all)out.push({id:"pf_"+d+"_"+k,ts:new Date(d+"T22:00:00").getTime(),ico:"⭐",u:k,txt:`<b>${esc(USERS[k].n)}</b> fechou o dia perfeito em ${DFULL[new Date(d+"T12:00:00").getDay()]}`})}}));
+  return out.sort((a,b)=>b.ts-a.ts).slice(0,25);
+}
+function reactBar(id){
+  const R=hlist("r|"+id+"|");
+  return`<div class="reacts">${REACTS.map(e=>{const who=R.filter(x=>x.e===e),mine=who.some(x=>x.k.split("|")[2]===user);return`<button class="${mine?"on":""}" data-act="react" data-id="${id}" data-v="${e}" title="${who.map(x=>esc((USERS[x.k.split("|")[2]]||{n:"?"}).n)).join(", ")}">${e}${who.length?" "+who.length:""}</button>`}).join("")}</div>`;
+}
+const CHAL=[{id:"ck",ico:"✅",t:"16 check-ins",max:16},{id:"agua",ico:"💧",t:"Água batida em 20 dias",max:20},{id:"sono",ico:"😴",t:"Sono de 7h+ em 15 noites",max:15}];
+function chalVal(id,ym){const[y,m]=ym.split("-").map(Number),first=ym+"-01",last=ds(new Date(y,m,0)),P=DIET[user],days=[];for(let d=first;d<=last&&d<=today();d=addDays(d,1))days.push(d);
+  if(id==="ck")return new Set(mine().filter(l=>l.date>=first&&l.date<=last&&hasData(l)&&W[l.w]).map(l=>l.date)).size;
+  if(id==="agua")return days.filter(d=>{const x=dpeek(d);return x&&x.w>=P.water}).length;
+  return days.filter(d=>{const x=dpeek(d);return x&&x.sl!=null&&x.sl>=P.sleep}).length}
 function rankView(){
   const ym=ymOf(today()),[y,m]=ym.split("-").map(Number),left=new Date(y,m,0).getDate()-new Date().getDate();
   const rows=Object.keys(USERS).map(k=>asUser(k,()=>{const St=stats(),wk=weekSummary(monOf(today())),ms=monthStats(ym);return{k,n:USERS[k].n,xp:St.xp,wx:wk.xp,mx:ms.xp,ck:ms.ck,lv:lvl(St.xp),st:St.st,best:St.best,gym:wk.gym,card:wk.card}}));
@@ -951,6 +982,13 @@ function rankView(){
   h+=`<div class="users"><button class="${rankMode==="m"?"on":""}" data-act="rank-mode" data-v="m">Mês</button><button class="${rankMode==="w"?"on":""}" data-act="rank-mode" data-v="w">Semana</button><button class="${rankMode==="g"?"on":""}" data-act="rank-mode" data-v="g">Geral</button></div><div class="list">`;
   rows.forEach((r,i)=>{h+=`<div class="item rank${i===0&&r[by]>0?" top":""}"><span class="medal">${r[by]>0&&i<3?md[i]:(i+1)+"º"}</span><div><strong>${esc(r.n)}${r.k===user?" <span class=\"you\">você</span>":""}</strong><small>${rankMode==="m"?`✅ ${r.ck} ${r.ck===1?"check-in":"check-ins"} no mês · `:""}Nível ${r.lv.n} · 🔥 ${r.st}</small></div><span class="rxp">${fmt(r[by])}<small>XP</small></span></div>`});
   h+=`</div>`;
+  if(rankMode==="m"){
+    const bet=hget("bet|"+ym),lastP=rows.length>1?rows[rows.length-1]:null;
+    h=h.replace('<div class="list">',`<div class="bet">${bet&&bet.txt?`<div><small>💰 Aposta de ${MES[m-1]}</small><b>${esc(bet.txt)}</b>${lastP&&rows[0][by]>0?`<small>Por enquanto, quem paga: <b>${esc(lastP.n)}</b> 😬</small>`:""}</div><button class="btn ghost small" data-act="bet-open">Editar</button>`:`<div><small>💰 Aposta do mês</small><b>Ainda sem aposta</b><small>Quem ficar em último paga o quê?</small></div><button class="btn small" data-act="bet-open">Definir</button>`}</div><div class="list">`);
+    h+=`<h2 class="section-title" style="margin-top:20px">Desafios de ${MES[m-1]}</h2><div class="list">`+CHAL.map(c=>{const vals=Object.keys(USERS).map(k=>({k,n:USERS[k].n,v:asUser(k,()=>chalVal(c.id,ym))}));return`<div class="item goal"><span class="mico">${c.ico}</span><div><strong>${c.t}</strong>${vals.map(x=>`<div class="cline"><span>${esc(x.n)}</span><div class="gbar"><i style="width:${Math.min(100,Math.round(x.v/c.max*100))}%"></i></div><span>${x.v>=c.max?"🏅":x.v+"/"+c.max}</span></div>`).join("")}</div></div>`}).join("")+`</div>`;
+  }
+  const FI=feedItems();
+  if(FI.length)h+=`<h2 class="section-title" style="margin-top:20px">Feed da galera</h2><div class="list">`+FI.map(f=>`<div class="item feed"><span class="mico">${f.ico}</span><div><div>${f.txt}</div><small>${ago(f.ts)}</small>${reactBar(f.id)}</div></div>`).join("")+`</div>`;
   if(rankMode==="m")h+=`<p class="hint" style="margin-top:10px">Check-in = dia com treino ou cardio registrado. Empate no XP é decidido pelos check-ins. No dia 1º o placar zera e o campeão vai para o Hall da Fama.</p>`;
   const best=(f,lbl,u)=>{const s=rows.slice().sort((a,b)=>b[f]-a[f])[0];return s&&s[f]>0?`<div class="item"><span class="mico">${lbl[0]}</span><div><strong>${lbl[1]}</strong><small>${esc(s.n)} · ${fmt(s[f])}${u}</small></div></div>`:""};
   const hl2=best("ck",["✅","Mais check-ins no mês"],"")+best("gym",["🏋️","Mais treinos na semana"],"")+best("card",["🏃","Mais cardio na semana"]," min")+best("best",["🔥","Maior sequência de todos"]," dias");
@@ -1123,6 +1161,9 @@ document.addEventListener("click",e=>{
     const rx=personRx(u,ex.id,ex);if(rx.rest)gStart(u,rx.rest);return}
   if(act==="gfinish"){const need=grp.users.filter(u=>hasData(grp.logs[u]));if(!need.length){toast("Conclua pelo menos uma série antes de finalizar");return}openModal(`<h2>Finalizar</h2><p>Cada um digita o próprio nome para confirmar.</p>${need.map((u,i)=>`<input data-who="${i}" autocomplete="off" autocapitalize="words" placeholder="Nome ${i+1}" style="margin-bottom:8px">`).join("")}<p class="err" id="whoErr"></p><button class="btn" data-act="g-confirm">Confirmar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
   if(act==="g-confirm"){gConfirm();return}
+  if(act==="react"){const id=b.dataset.id,k="r|"+id+"|"+user,cur=hget(k);if(cur&&cur.e===v)hsave(k,null);else hsave(k,{e:v});render();return}
+  if(act==="bet-open"){const ym=today().slice(0,7),bt=hget("bet|"+ym);openModal(`<h2>Aposta do mês</h2><p>O que quem ficar em último no ranking de ${MES[+ym.slice(5)-1]} vai pagar?</p><input id="betIn" maxlength="120" placeholder="Ex.: açaí de 500 ml para todo mundo" value="${esc(bt&&bt.txt||"")}"><button class="btn" data-act="bet-save">Salvar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
+  if(act==="bet-save"){const t=($("#betIn").value||"").trim();hsave("bet|"+today().slice(0,7),t?{txt:t,by:user}:null);closeModal();render();toast(t?"Aposta valendo! 💰":"Aposta removida");return}
   if(act==="rank-mode"){rankMode=v;render();return}
   if(act==="u-add"){addUserModal();return}
   if(act==="u-save"){const n=($("#uName").value||"").trim(),k=ukey(n);if(!k){$("#uErr").textContent="Digite um nome.";return}if(USERS[k]){$("#uErr").textContent="Já existe alguém com esse nome.";return}hsave("user|"+k,{n,base:$("#uBase").value});loadDynUsers();user=k;try{localStorage.setItem(LSU,k)}catch(e){}closeModal();R=null;render();toast(n+" entrou no TURUGYM 🐊");return}
