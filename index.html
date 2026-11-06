@@ -1070,7 +1070,7 @@ function gConfirm(){
 }
 
 /* ---------- sync GitHub ---------- */
-const GH={owner:"aarturaraujob-collab",repo:"turugym",path:"data/turugym.json",branch:"main"};
+const GH={owner:"aarturaraujob-collab",repo:"turugym",path:"data/turugym.json",branch:"data"};
 const LSG="th_gh_token",LSDEAD="th_dead_v1";
 let dead={},ghTok=null,ghSha=null,ghBusy=false,ghDirty=false,ghTimer=null,ghState="off",ghMsg="";
 function ghLoadTok(){try{ghTok=localStorage.getItem(LSG)||null}catch(e){}try{dead=JSON.parse(localStorage.getItem(LSDEAD)||"{}")||{}}catch(e){dead={}}}
