@@ -161,6 +161,9 @@ button.day{font:inherit;width:100%}
 .chips button.on{border-color:var(--pri-text);background:var(--soft);font-weight:600}
 .chips button.on::after{content:"✓";margin-left:auto;color:var(--pri-text)}
 .row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.exlinks{display:flex;gap:6px;margin:6px 2px 2px;flex-wrap:wrap}
+.exlinks a,.exlinks button{font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:5px 11px;text-decoration:none}
+.exlinks button.set{background:var(--soft);border-color:var(--pri-text);color:var(--pri-text)}
 .bet{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--pri);color:var(--pri-ink);border-radius:16px;padding:14px;margin:0 0 10px}
 .bet small{display:block;font-size:13px;opacity:.85}.bet b{display:block;font:800 20px "Saira Condensed",sans-serif;line-height:1.15;margin:2px 0}
 .bet .btn{background:var(--pri-ink);color:var(--pri);border:0;flex:none}
@@ -283,7 +286,7 @@ const EX={
   supart:{n:"Supino inclinado articulado"},remm:{n:"Remada máquina pegada neutra"},desm:{n:"Desenvolvimento máquina"},
   martelo:{n:"Rosca martelo c/ halteres"},puxab:{n:"Puxada aberta"},rembt:{n:"Remada baixa c/ triângulo"},
   cruinvm:{n:"Crucifixo inverso máquina"},testa:{n:"Tríceps testa na polia c/ corda"},roscacorda:{n:"Rosca martelo na polia c/ corda"},
-  bulg:{n:"Búlgaro"},peck:{n:"Voador (peck deck)"},ellp:{n:"Elevação lateral na polia"},
+  bulg:{n:"Búlgaro"},peck:{n:"Voador (peck deck)"},ellp:{n:"Elevação lateral na polia"},pullover:{n:"Pullover na polia com corda"},scott:{n:"Rosca Scott na máquina"},triuni:{n:"Tríceps unilateral na polia"},stiffsm:{n:"Stiff no smith"},
   hipm:{n:"Hip thrust na máquina"},stiffh:{n:"Stiff com halteres"},mesaflex:{n:"Mesa ou cadeira flexora"},
   afundo:{n:"Afundo no Smith ou búlgaro"},puxfr:{n:"Puxada frontal na polia"},remsp:{n:"Remada sentada na polia"},
   roscah:{n:"Rosca bíceps com halteres"},supincm:{n:"Supino inclinado na máquina"},remap:{n:"Remada com apoio no peito"},
@@ -305,21 +308,21 @@ const W={
   B:{u:"artur",k:"B",n:"Treino B",s:"Costas + bíceps",warm:"Mobilidade de ombro + 2 séries leves na puxada. Use strap nas puxadas e remadas se o pulso reclamar.",ex:[
     {id:"puxtri",r:[8,8,8,8],rg:"6–8",rest:120,sug:60,tag:"Principal do dia. Deixe 1–2 reps no tanque."},
     {id:"remm",r:[10,10,10,10],rg:"8–10",rest:90,sug:45},
-    {id:"puxab",r:[12,12,12],rg:"10–12",rest:90,sug:55,tag:"Pegada aberta: foco na largura das costas"},
+    {id:"pullover",r:[15,15,15],rg:"12–15",rest:60,sug:25,tag:"Braços quase esticados: puxe com as costas, não com o bíceps"},
     {id:"roscaw",r:[10,10,10],rg:"8–10",rest:75,sug:25,tag:"Carga total com a barra"},
     {id:"martelo",r:[12,12,12],rg:"10–12",rest:60,h:1,sug:12}]},
-  C:{u:"artur",k:"C",n:"Treino C",s:"Ombro + abdômen",warm:"Mobilidade de ombro + 2 séries leves no desenvolvimento.",ex:[
+  C:{u:"artur",k:"C",n:"Treino C",s:"Ombro + braços",warm:"Mobilidade de ombro + 2 séries leves no desenvolvimento.",ex:[
     {id:"desm",r:[10,10,10,10],rg:"8–10",rest:120,sug:30,tag:"Principal do dia. Pegada neutra se a máquina tiver."},
     {id:"ella",r:[15,15,15,15],rg:"12–15",rest:60,h:1,sug:10,tag:"Prioridade do shape: controle a descida"},
-    {id:"ellp",r:[15,15,15],rg:"12–15 cada lado",rest:45,sug:5,tag:"Um braço de cada vez, cabo passando na frente do corpo"},
     {id:"cruinvm",r:[15,15,15],rg:"12–15",rest:60,sug:35,tag:"Posterior de ombro: completa o ombro redondo"},
-    {id:"elevp",r:[15,15,15],rg:"12–15",rest:45}]},
+    {id:"scott",r:[12,12,12],rg:"10–12",rest:0,sug:20,tag:"Bi-set: emende com o tríceps unilateral"},
+    {id:"triuni",r:[12,12,12],rg:"10–12 cada braço",rest:60,sug:10,tag:"Bi-set. Pegada neutra, cotovelo colado no corpo"}]},
   D:{u:"artur",k:"D",n:"Treino D",s:"Pernas + cardio Z2",warm:"5 min de bike leve + 2 séries leves no primeiro exercício. O cardio Z2 vem depois.",ex:[
-    {id:"hack",r:[8,8,8],rg:"6–8",rest:150,sug:100,tag:"Sem hack na sua unidade: agachamento no smith"},
+    {id:"hack",r:[8,8,8],rg:"6–8",rest:150,sug:100,tag:"Principal do dia. Sem hack na sua unidade: agachamento no smith"},
     {id:"lp45",r:[12,12,12],rg:"10–12",rest:120,sug:200},
-    {id:"thrust",r:[10,10,10],rg:"8–10",rest:90,sug:60,tag:"No smith ou na máquina de glúteo. As mãos só estabilizam."},
+    {id:"stiffsm",r:[10,10,10],rg:"8–10",rest:90,sug:40,tag:"Carga total com a barra. Use strap e desça só até sentir o posterior alongar."},
     {id:"mesa",r:[12,12,12],rg:"10–12",rest:75,sug:40,tag:"Sem mesa: cadeira flexora"},
-    {id:"ext",r:[15,15,15],rg:"12–15",rest:60,sug:75}]},
+    {id:"pantlp",r:[15,15,15],rg:"12–15",rest:45,sug:120,tag:"No próprio leg press, só a ponta dos pés na plataforma"}]},
   R1:{u:"artur",k:"1:1",ico:"🏃",n:"Tiros 1:1",s:"7× (1 min forte + 1 min leve)",run:[60,60]},
   R4:{u:"artur",k:"2:1",ico:"🏃",n:"Tiros 2:1",s:"6× (2 min forte + 1 min leve)",phases:[{z:1,d:300,l:"Aquecimento leve"},...[1,2,3,4,5,6].flatMap(k=>[{z:3,d:120,l:"Rápido",k},{z:1,d:60,l:"Leve",k}]),{z:1,d:300,l:"Desaquecimento leve"}]},
   R2:{u:"artur",k:"1:2",ico:"🏃",n:"Corrida 1:2 (pausada)",s:"Volta quando o médico liberar",run:[45,90]},
@@ -528,7 +531,7 @@ function workout(){
     const ex=EX[e.id],t=ex.t||"kg",sets=l.sets[e.id]||[],prev=prevSets(e.id,l.id);
     const restTxt=e.rest?(e.rest>=60&&e.rest%60===0?e.rest/60+" min":e.rest+"s"):"sem descanso";
     const nums=e.rg?e.r.length+"×"+e.rg:(e.r.every(x=>x===e.r[0])?e.r.length+"×"+e.r[0]:e.r.join("-"));
-    h+=`<section class="ex"><div class="ex-head"><h3>${ex.n}</h3><span class="meta">${nums} · ${restTxt}</span></div>`;
+    h+=`<section class="ex"><div class="ex-head"><h3>${ex.n}</h3><span class="meta">${nums} · ${restTxt}</span></div>${exLinks(e.id)}`;
     if(e.tag)h+=`<div class="tag">${e.tag}</div>`;
     const cls=t==="kg"?"grid":t==="bw"?"grid nokg":"grid time";
     h+=`<div class="${cls}"><span class="gh">Série</span><span class="gh l">Anterior</span>${t==="kg"?`<span class="gh">${e.h?"kg cada":"kg"}</span>`:""}${t!=="time"?'<span class="gh">Reps</span>':""}<span class="gh">✓</span></div>`;
@@ -1014,6 +1017,8 @@ let gRest={};
 function personRx(u,exId,e){for(const w of USERS[u].list){const x=W[w]&&W[w].ex&&W[w].ex.find(z=>z.id===exId);if(x)return x}return e}
 function gStart(u,sec){gRest[u]={end:Date.now()+sec*1000,tick:0};wakeOn();askNotif();paintG()}
 function paintG(){const el=$("#grest");if(!el)return;const U=grp?grp.users:Object.keys(gRest);el.innerHTML=Object.keys(gRest).map(u=>{const ui=Math.max(0,U.indexOf(u)),l=(gRest[u].end-Date.now())/1000;return`<div class="rest-in"><i class="who who${ui}">${esc((USERS[u]||{n:"?"}).n[0])}</i><div class="t">${mmss(l)}<small>Descanso de ${esc((USERS[u]||{n:""}).n)}</small></div><button data-act="g-rest-add" data-u="${u}" data-v="15">+15s</button><button data-act="g-rest-skip" data-u="${u}">Pular</button></div>`}).join("");if(!Object.keys(gRest).length&&!(R&&R.on)&&!rest.end)wakeOff()}
+
+function exLinks(id){const mq=hget("mq|"+id);return`<div class="exlinks"><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(EX[id].n+" execução academia")}" target="_blank" rel="noopener">▶ Ver execução</a><button data-act="mq" data-v="${id}" class="${mq?"set":""}">${mq?"🏷 Máquina "+esc(mq.n):"🏷 Nº da máquina"}</button></div>`}
 /* ---------- treinar junto (mesma tela) ---------- */
 let grp=null,GSEL=[],GW=null;
 function gModal(){
@@ -1029,7 +1034,7 @@ function gworkout(){
     const ex=EX[e.id],t=ex.t||"kg";
     const restTxt=e.rest?(e.rest>=60&&e.rest%60===0?e.rest/60+" min":e.rest+"s"):"sem descanso";
     const nums=e.rg?e.r.length+"×"+e.rg:(e.r.every(x=>x===e.r[0])?e.r.length+"×"+e.r[0]:e.r.join("-"));
-    h+=`<section class="ex"><div class="ex-head"><h3>${ex.n}</h3><span class="meta">${nums} · ${restTxt}</span></div>`;
+    h+=`<section class="ex"><div class="ex-head"><h3>${ex.n}</h3><span class="meta">${nums} · ${restTxt}</span></div>${exLinks(e.id)}`;
     if(e.tag)h+=`<div class="tag">${e.tag}</div>`;
     const cls=t==="kg"?"grid":t==="bw"?"grid nokg":"grid time";
     h+=`<div class="${cls}"><span class="gh">Quem</span><span class="gh l">Anterior</span>${t==="kg"?`<span class="gh">${e.h?"kg cada":"kg"}</span>`:""}${t!=="time"?'<span class="gh">Reps</span>':""}<span class="gh">✓</span></div>`;
@@ -1162,6 +1167,8 @@ document.addEventListener("click",e=>{
     const rx=personRx(u,ex.id,ex);if(rx.rest)gStart(u,rx.rest);return}
   if(act==="gfinish"){const need=grp.users.filter(u=>hasData(grp.logs[u]));if(!need.length){toast("Conclua pelo menos uma série antes de finalizar");return}openModal(`<h2>Finalizar</h2><p>Cada um digita o próprio nome para confirmar.</p>${need.map((u,i)=>`<input data-who="${i}" autocomplete="off" autocapitalize="words" placeholder="Nome ${i+1}" style="margin-bottom:8px">`).join("")}<p class="err" id="whoErr"></p><button class="btn" data-act="g-confirm">Confirmar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
   if(act==="g-confirm"){gConfirm();return}
+  if(act==="mq"){const mq=hget("mq|"+v);openModal(`<h2>Nº da máquina</h2><p>${esc(EX[v].n)}. Fica salvo para todo mundo que treina na mesma academia.</p><input id="mqIn" maxlength="12" placeholder="Ex.: 14" value="${esc(mq&&mq.n||"")}"><button class="btn" data-act="mq-save" data-v="${v}">Salvar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);setTimeout(()=>{const i=$("#mqIn");i&&i.focus()},50);return}
+  if(act==="mq-save"){const t=($("#mqIn").value||"").trim();hsave("mq|"+v,t?{n:t}:null);closeModal();render();return}
   if(act==="react"){const id=b.dataset.id,k="r|"+id+"|"+user,cur=hget(k);if(cur&&cur.e===v)hsave(k,null);else hsave(k,{e:v});render();return}
   if(act==="bet-open"){const ym=today().slice(0,7),bt=hget("bet|"+ym);openModal(`<h2>Aposta do mês</h2><p>O que quem ficar em último no ranking de ${MES[+ym.slice(5)-1]} vai pagar?</p><input id="betIn" maxlength="120" placeholder="Ex.: açaí de 500 ml para todo mundo" value="${esc(bt&&bt.txt||"")}"><button class="btn" data-act="bet-save">Salvar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
   if(act==="bet-save"){const t=($("#betIn").value||"").trim();hsave("bet|"+today().slice(0,7),t?{txt:t,by:user}:null);closeModal();render();toast(t?"Aposta valendo! 💰":"Aposta removida");return}
