@@ -286,11 +286,11 @@ const EX={
   supart:{n:"Supino inclinado articulado"},remm:{n:"Remada máquina pegada neutra"},desm:{n:"Desenvolvimento máquina"},
   martelo:{n:"Rosca martelo c/ halteres"},puxab:{n:"Puxada aberta"},rembt:{n:"Remada baixa c/ triângulo"},
   cruinvm:{n:"Crucifixo inverso máquina"},testa:{n:"Tríceps testa na polia c/ corda"},roscacorda:{n:"Rosca martelo na polia c/ corda"},
-  bulg:{n:"Búlgaro"},peck:{n:"Voador (peck deck)"},ellp:{n:"Elevação lateral na polia"},pullover:{n:"Pullover na polia com corda"},scott:{n:"Rosca Scott na máquina"},triuni:{n:"Tríceps unilateral na polia"},stiffsm:{n:"Stiff no smith"},
+  bulg:{n:"Búlgaro"},peck:{n:"Voador (peck deck)"},ellp:{n:"Elevação lateral na polia"},pullover:{n:"Pullover na polia com corda"},scott:{n:"Rosca Scott na máquina"},triuni:{n:"Tríceps unilateral na polia"},stiffsm:{n:"Stiff no smith"},bulgsm:{n:"Afundo búlgaro no Smith"},coice:{n:"Coice de glúteo na polia"},afrev:{n:"Afundo reverso no Smith"},stiffl:{n:"Stiff"},pantem:{n:"Panturrilha em pé na máquina"},pantsent:{n:"Panturrilha sentada"},abdpolia:{n:"Abdominal na polia alta"},woodchop:{n:"Woodchopper na polia"},infra:{n:"Abdominal infra / elevação de quadril",t:"bw"},
   hipm:{n:"Hip thrust na máquina"},stiffh:{n:"Stiff com halteres"},mesaflex:{n:"Mesa ou cadeira flexora"},
   afundo:{n:"Afundo no Smith ou búlgaro"},puxfr:{n:"Puxada frontal na polia"},remsp:{n:"Remada sentada na polia"},
   roscah:{n:"Rosca bíceps com halteres"},supincm:{n:"Supino inclinado na máquina"},remap:{n:"Remada com apoio no peito"},
-  roscap:{n:"Rosca bíceps na polia"},tricacima:{n:"Tríceps acima da cabeça na polia"},agsmith:{n:"Agachamento no Smith"},
+  roscap:{n:"Rosca bíceps na polia"},tricacima:{n:"Tríceps francês na polia"},agsmith:{n:"Agachamento no Smith"},
   glute:{n:"Hip thrust ou glute drive"},deadbug:{n:"Dead bug",t:"bw"},crunch:{n:"Crunch abdominal",t:"bw"},
   pranchal:{n:"Prancha lateral",t:"time"},birddog:{n:"Bird dog",t:"bw"},elevj:{n:"Elevação de joelhos deitado",t:"bw"},
   bikeab:{n:"Abdominal bicicleta lento",t:"bw"}
@@ -328,37 +328,38 @@ const W={
   R2:{u:"artur",k:"1:2",ico:"🏃",n:"Corrida 1:2 (pausada)",s:"Volta quando o médico liberar",run:[45,90]},
   R3:{u:"artur",k:"Z2",ico:"🏃",n:"Cardio Z2 25 min",s:"Depois do treino de perna",phases:[{z:1,d:180,l:"Aquecimento leve"},{z:2,d:1200,l:"Z2 contínuo"},{z:1,d:120,l:"Desaquecimento"}],note:ZNOTE},
   RW:{u:"artur",k:"🚶",ico:"🚶",n:"Caminhada 40 min",s:"Z2, ritmo de conversa",phases:[{z:2,d:2400,l:"Caminhada Z2"}],note:ZNOTE},
-  LA:{u:"laila",k:"IA",n:"Inferiores A",s:"Glúteos e posteriores",warm:"Alguns minutos de movimento leve + 1–3 séries progressivas no hip thrust (não contam).",ex:[
-    {id:"hipm",r:[12,12,12],rg:"8–12",rest:150,tag:"Principal do dia. Termine sentindo que faria mais 1–3 reps."},
-    {id:"stiffh",r:[12,12,12],rg:"8–12",rest:120,h:1},
-    {id:"mesaflex",r:[15,15,15],rg:"10–15",rest:75},
-    {id:"afundo",r:[12,12],rg:"8–12 por perna",rest:90},
-    {id:"abd",r:[20,20,20],rg:"12–20",rest:60}]},
-  LB:{u:"laila",k:"SA",n:"Superiores A",s:"Costas e bíceps",warm:"Alguns minutos de movimento leve + 1–3 séries progressivas na puxada (não contam).",ex:[
-    {id:"puxfr",r:[12,12,12],rg:"8–12",rest:120},
-    {id:"remsp",r:[12,12,12],rg:"8–12",rest:120},
-    {id:"supm",r:[12,12,12],rg:"8–12",rest:120},
-    {id:"ella",r:[15,15,15],rg:"12–15",rest:75,h:1},
-    {id:"roscah",r:[15,15,15],rg:"10–15",rest:75,h:1},
-    {id:"tricorda",r:[15,15],rg:"10–15",rest:75}]},
-  LC:{u:"laila",k:"SB",n:"Superiores B",s:"Peito, ombros e equilíbrio",warm:"Alguns minutos de movimento leve + 1–3 séries progressivas no supino (não contam).",ex:[
-    {id:"supincm",r:[12,12,12],rg:"8–12",rest:120},
-    {id:"remap",r:[12,12,12],rg:"8–12",rest:120},
-    {id:"desm",r:[12,12],rg:"8–12",rest:90},
-    {id:"cruinvm",r:[15,15,15],rg:"12–15",rest:75},
-    {id:"roscap",r:[15,15],rg:"10–15",rest:75},
-    {id:"tricacima",r:[15,15],rg:"10–15",rest:75}]},
-  LD:{u:"laila",k:"IB",n:"Inferiores B",s:"Quadríceps e glúteos",warm:"Alguns minutos de movimento leve + 1–3 séries progressivas no agachamento (não contam).",ex:[
-    {id:"agsmith",r:[12,12,12],rg:"8–12",rest:150,tag:"Principal do dia. Termine sentindo que faria mais 1–3 reps."},
-    {id:"lp45",r:[12,12,12],rg:"10–12",rest:120},
-    {id:"ext",r:[15,15,15],rg:"10–15",rest:75},
-    {id:"glute",r:[12,12,12],rg:"10–12",rest:90},
-    {id:"flex",r:[15,15],rg:"10–15",rest:75},
-    {id:"abd",r:[20,20],rg:"15–20",rest:60,tag:"Opcional"}]},
-  LK1:{u:"laila",k:"🚶",ico:"🚶",n:"Caminhada 30 min",s:"Leve a moderada",phases:[{z:2,d:1800,l:"Caminhada"}],
-    note:"Ritmo que permita conversar sem ficar muito ofegante. Não sacrifique o sono para treinar cedo. Depois, o abdômen."},
-  LK2:{u:"laila",k:"🚲",ico:"🚲",n:"Caminhada ou bike",s:"20–30 min, leve a moderada",phases:[{z:2,d:1500,l:"Caminhada ou bike"}],
-    note:"Ajuste a duração conforme a recuperação das pernas depois de sexta. Depois, o abdômen."},
+  LA:{u:"laila",k:"IA",n:"Inferiores A",s:"Glúteos e posteriores",warm:"Alguns minutos de movimento leve + 1–2 séries leves no hip thrust (não contam). Primeiras 2 semanas: faça 2 séries nos exercícios de 3 e termine com 2–3 reps sobrando. Depois, volume completo e 1–2 reps sobrando.",ex:[
+    {id:"hipm",r:[10,10,10],rg:"6–10",rest:150,tag:"Principal do dia"},
+    {id:"bulgsm",r:[10,10],rg:"6–10 por perna",rest:120},
+    {id:"flex",r:[10,10,10],rg:"6–10",rest:90},
+    {id:"coice",r:[10,10],rg:"6–10 por perna",rest:60}]},
+  LB:{u:"laila",k:"SA",n:"Superiores A",s:"Costas e bíceps",warm:"Alguns minutos de movimento leve + 1–2 séries leves na puxada (não contam). Primeiras 2 semanas: faça 2 séries nos exercícios de 3 e termine com 2–3 reps sobrando. Depois, volume completo e 1–2 reps sobrando. O cardio de 30 min vem depois.",ex:[
+    {id:"puxfr",r:[10,10,10],rg:"6–10",rest:150,tag:"Principal do dia"},
+    {id:"remsp",r:[10,10,10],rg:"6–10",rest:120},
+    {id:"cruinvm",r:[12,12,12],rg:"8–12",rest:90},
+    {id:"scott",r:[10,10,10],rg:"6–10",rest:90}]},
+  LC:{u:"laila",k:"SB",n:"Superiores B",s:"Peito, ombros e tríceps",warm:"Alguns minutos de movimento leve + 1–2 séries leves no supino (não contam). Primeiras 2 semanas: faça 2 séries nos exercícios de 3 e termine com 2–3 reps sobrando. Depois, volume completo e 1–2 reps sobrando. O cardio de 30 min vem depois.",ex:[
+    {id:"supm",r:[10,10,10],rg:"6–10",rest:150,tag:"Principal do dia"},
+    {id:"desm",r:[10,10,10],rg:"6–10",rest:120},
+    {id:"tricorda",r:[10,10,10],rg:"6–10",rest:90},
+    {id:"tricacima",r:[12,12],rg:"8–12",rest:90}]},
+  LD:{u:"laila",k:"IB",n:"Inferiores B",s:"Quadríceps e posteriores",warm:"Alguns minutos de movimento leve + 1–2 séries leves no leg press (não contam). Primeiras 2 semanas: faça 2 séries nos exercícios de 3 e termine com 2–3 reps sobrando. Depois, volume completo e 1–2 reps sobrando.",ex:[
+    {id:"lp45",r:[10,10,10],rg:"6–10",rest:150,tag:"Principal do dia"},
+    {id:"ext",r:[10,10,10],rg:"6–10",rest:90},
+    {id:"afrev",r:[10,10],rg:"6–10 por perna",rest:120},
+    {id:"stiffl",r:[10,10,10],rg:"6–10",rest:120,tag:"Se o posterior ainda estiver cansado do sábado, faça só 2 séries ou baixe a carga"}]},
+  LP:{u:"laila",k:"PT",n:"Panturrilhas",s:"Treino curto + cardio de 20 min",warm:"Treino curto. Depois, 20 min de cardio moderado se estiver bem recuperada; se o dia estiver puxado, 10–15 min.",ex:[
+    {id:"pantem",r:[12,12,12],rg:"8–12",rest:75},
+    {id:"pantsent",r:[12,12,12],rg:"8–12",rest:75}]},
+  LO:{u:"laila",k:"OA",n:"Complementar",s:"Ombros e abdômen",warm:"Alguns minutos de movimento leve. O cardio de 30 min vem depois (ou em outro horário). Se der, mais 10 min de caminhada leve em outro momento do dia.",ex:[
+    {id:"ella",r:[12,12,12],rg:"8–12",rest:90,h:1},
+    {id:"abdpolia",r:[12,12,12],rg:"10–12",rest:60},
+    {id:"woodchop",r:[10,10],rg:"10 por lado",rest:60},
+    {id:"infra",r:[12,12],rg:"10–12",rest:60}]},
+  LK1:{u:"laila",k:"30",ico:"🚶",n:"Cardio moderado 30 min",s:"Bike, elíptico ou caminhada rápida",phases:[{z:2,d:1800,l:"Cardio moderado"}],
+    note:"Esforço 4–6 de 10: respira mais rápido, mas ainda conversa em frases. Não precisa ser HIIT."},
+  LK2:{u:"laila",k:"20",ico:"🚲",n:"Cardio moderado 20 min",s:"Bike ou caminhada leve a moderada",phases:[{z:2,d:1200,l:"Cardio moderado"}],
+    note:"Sessão curta depois do trabalho. Esforço 4–6 de 10. Se o dia estiver puxado, 10–15 min já valem."},
   LAB1:{u:"laila",k:"AB",n:"Abdômen 1",s:"Dead bug, pranchas e crunch",warm:"Depois do cardio. Descanse 30–45s entre exercícios. Começando? Faça 2 séries.",ex:[
     {id:"deadbug",r:[12,12,12],rg:"8–12 por lado",rest:40},
     {id:"prancha",r:["20–40s","20–40s","20–40s"],rest:40},
@@ -372,7 +373,7 @@ const W={
 };
 const USERS={
   artur:{n:"Artur",list:["A","B","C","D","R1","R4","R3","RW"],def:{0:["RW"],1:["A"],2:["R1"],3:["B"],4:["R4"],5:["C"],6:["D","R3"]}},
-  laila:{n:"Laila",list:["LA","LB","LC","LD","LK1","LK2","LAB1","LAB2"],def:{0:["LA"],1:["LB"],2:["LK1","LAB1"],3:[],4:["LC"],5:["LD"],6:["LK2","LAB2"]}}
+  laila:{n:"Laila",list:["LA","LB","LD","LP","LC","LO","LK1","LK2"],def:{6:["LA"],0:["LB","LK1"],1:["LD"],2:[],3:["LP","LK2"],4:["LC","LK1"],5:["LO","LK1"]}}
 };
 const DN=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const DFULL=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
@@ -724,8 +725,8 @@ const DIET={
       {id:"b12",n:"B12 (MecoBe)",d:"Conte ao médico que está tomando."},
       {id:"whey",n:"Whey (opcional)",d:"1 scoop no pré-treino ou no lanche, quando faltar proteína.",opt:1}],
     rules:["Não corte o sal: use normalmente na comida.","Café só até as 14h.","Telas desligadas 30 min antes de deitar. Meta: deitar 23h30.","Dia sem treino: pode juntar o pré-treino com o café.","Tontura ou cansaço forte: não treine em jejum e procure o médico."]},
-  laila:{water:10,sleep:7,cardioWeek:55,meals:null,sups:[],
-    rules:["Plano alimentar ainda não montado: peça no Claude com peso, altura, rotina e objetivo.","Meta provisória de água: 2,5 L por dia.","Meta de sono: 7 horas."]}
+  laila:{water:10,sleep:7,cardioWeek:120,meals:null,sups:[],
+    rules:["Calorias: 1.650–1.700 kcal/dia (estimativa inicial, déficit moderado).","Proteína: cerca de 135 g/dia.","Água: 2,5 L por dia. Sono: 7 horas.","Passos: primeiro alvo 4.000/dia, depois 5.000. Caminhadas de 5–10 min depois das refeições ajudam.","Cardio: comece com 110–120 min/semana e suba 10–15 min por semana até 150.","Acompanhe a média semanal do peso e as medidas a cada 3–4 semanas."]}
 };
 const XP={gym:40,cardio:30,prot:30,water:20,sleep:30,sup:10,rest:15,perfect:25};
 const LV=["Iniciante","Constante","Focado","Disciplinado","Atleta","Híbrido","Máquina","Lenda"];
