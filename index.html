@@ -161,6 +161,13 @@ button.day{font:inherit;width:100%}
 .chips button.on{border-color:var(--pri-text);background:var(--soft);font-weight:600}
 .chips button.on::after{content:"✓";margin-left:auto;color:var(--pri-text)}
 .row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.d30card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:linear-gradient(135deg,var(--pri),var(--frost));color:var(--pri-ink);border-radius:16px;padding:12px 14px;margin:0 0 12px}
+.d30card strong{display:block;font:800 20px "Saira Condensed",sans-serif;text-transform:uppercase}.d30card small{font-size:13px}.d30card div{flex:1}
+.d30n{font:800 34px "Saira Condensed",sans-serif;line-height:1}.d30n small{font-size:14px;opacity:.7}
+.d30grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:8px}
+.d30c{aspect-ratio:1;border-radius:7px;display:grid;place-items:center;font-size:13px;background:var(--bg);color:var(--muted);font-weight:600}
+.d30c.ok{background:var(--soft)}.d30c.jk{background:var(--amber-soft)}.d30c.x{background:#f3d6d0}.d30c.hoje{outline:2px solid var(--pri-text)}
+.d30p.lead{border-color:var(--pri-text)}
 .exlinks{display:flex;gap:6px;margin:6px 2px 2px;flex-wrap:wrap}
 .exlinks a,.exlinks button{font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:5px 11px;text-decoration:none}
 .exlinks button.set{background:var(--soft);border-color:var(--pri-text);color:var(--pri-text)}
@@ -324,6 +331,13 @@ const W={
     {id:"mesa",r:[12,12,12],rg:"10–12",rest:75,sug:40,tag:"Sem mesa: cadeira flexora"},
     {id:"pantlp",r:[15,15,15],rg:"12–15",rest:45,sug:120,tag:"No próprio leg press, só a ponta dos pés na plataforma"}]},
   R1:{u:"artur",k:"1:1",ico:"🏃",n:"Tiros 1:1",s:"7× (1 min forte + 1 min leve)",run:[60,60]},
+  E1:{u:"artur",k:"E1",n:"Extra 1",s:"Core + panturrilha (leve)",warm:"Treino leve do desafio: pare com 3 reps sobrando. Foco em músculos que não atrapalham os treinos principais.",ex:[
+    {id:"abdpolia",r:[15,15,15],rg:"12–15",rest:60},{id:"woodchop",r:[12,12],rg:"10–12 por lado",rest:60},{id:"pantlp",r:[15,15,15],rg:"12–15",rest:45,sug:100},{id:"prancha",r:["40s","40s","40s"],rest:45}]},
+  E2:{u:"artur",k:"E2",n:"Extra 2",s:"Ombro posterior + core (leve)",warm:"Treino leve do desafio: pare com 3 reps sobrando. Foco em músculos que não atrapalham os treinos principais.",ex:[
+    {id:"cruinvm",r:[15,15,15],rg:"12–15",rest:60,sug:30},{id:"ella",r:[15,15],rg:"12–15",rest:60,h:1,sug:8},{id:"elevp",r:[15,15,15],rg:"12–15",rest:45},{id:"pranchal",r:["30s cada lado","30s cada lado"],rest:45}]},
+  E3:{u:"artur",k:"E3",n:"Extra 3",s:"Glúteo + panturrilha (leve)",warm:"Treino leve do desafio: pare com 3 reps sobrando. Foco em músculos que não atrapalham os treinos principais. O sábado tem perna pesada: aqui é só ativação.",ex:[
+    {id:"abd",r:[15,15,15],rg:"12–15",rest:60,sug:70},{id:"thrust",r:[12,12],rg:"10–12",rest:75,sug:40},{id:"pantsent",r:[15,15,15],rg:"12–15",rest:45},{id:"prancha",r:["40s","40s"],rest:45}]},
+  RZ:{u:"artur",k:"Z2",ico:"🏃",n:"Cardio Z2 20 min",s:"Depois da musculação",phases:[{z:1,d:120,l:"Aquecimento leve"},{z:2,d:960,l:"Z2 contínuo"},{z:1,d:120,l:"Desaquecimento"}],note:ZNOTE},
   R4:{u:"artur",k:"2:1",ico:"🏃",n:"Tiros 2:1",s:"6× (2 min forte + 1 min leve)",phases:[{z:1,d:300,l:"Aquecimento leve"},...[1,2,3,4,5,6].flatMap(k=>[{z:3,d:120,l:"Rápido",k},{z:1,d:60,l:"Leve",k}]),{z:1,d:300,l:"Desaquecimento leve"}]},
   R2:{u:"artur",k:"1:2",ico:"🏃",n:"Corrida 1:2 (pausada)",s:"Volta quando o médico liberar",run:[45,90]},
   R3:{u:"artur",k:"Z2",ico:"🏃",n:"Cardio Z2 25 min",s:"Depois do treino de perna",phases:[{z:1,d:180,l:"Aquecimento leve"},{z:2,d:1200,l:"Z2 contínuo"},{z:1,d:120,l:"Desaquecimento"}],note:ZNOTE},
@@ -357,6 +371,8 @@ const W={
     {id:"desm",r:[10,10],rg:"6–10",rest:120},
     {id:"supm",r:[10,10],rg:"6–10",rest:120}]},
   LP:{u:"laila",k:"PT",n:"Panturrilhas",s:"Plano anterior",ex:[{id:"pantem",r:[12,12,12],rg:"8–12",rest:75},{id:"pantsent",r:[12,12,12],rg:"8–12",rest:75}]},
+  LE:{u:"laila",k:"LE",n:"Extra",s:"Mobilidade + core (leve)",warm:"Treino leve do desafio: sem pressa, foco em controle. Depois, 20 min de cardio moderado.",ex:[
+    {id:"birddog",r:[10,10],rg:"10 por lado",rest:45},{id:"deadbug",r:[10,10],rg:"10 por lado",rest:45},{id:"pranchal",r:["20–30s cada lado","20–30s cada lado"],rest:45},{id:"elevj",r:[12,12],rg:"10–12",rest:45}]},
   LK1:{u:"laila",k:"30",ico:"🚶",n:"Cardio moderado 30 min",s:"Zona 2 · bike, elíptico ou caminhada",phases:[{z:2,d:1800,l:"Cardio moderado"}],note:"Zona 2: dá pra conversar, embora com esforço. Alterne bike, elíptico e caminhada."},
   LK3:{u:"laila",k:"25",ico:"🚶",n:"Cardio moderado 25 min",s:"Zona 2 · bike, elíptico ou caminhada",phases:[{z:2,d:1500,l:"Cardio moderado"}],note:"Zona 2: dá pra conversar, embora com esforço. Alterne bike, elíptico e caminhada."},
   LK2:{u:"laila",k:"20",ico:"🚲",n:"Cardio moderado 20 min",s:"Zona 2 · bike, elíptico ou caminhada",phases:[{z:2,d:1200,l:"Cardio moderado"}],note:"Zona 2: dá pra conversar, embora com esforço. Alterne bike, elíptico e caminhada."},
@@ -372,8 +388,8 @@ const W={
     {id:"prancha",r:["20–40s","20–40s","20–40s"],rest:40}]}
 };
 const USERS={
-  artur:{n:"Artur",list:["A","B","C","D","R1","R4","R3","RW"],def:{0:["RW"],1:["A"],2:["R1"],3:["B"],4:["R4"],5:["C"],6:["D","R3"]}},
-  laila:{n:"Laila",list:["LA","LB","LD","LW","LO","LC","LK2","LK3","LK1"],def:{6:["LA","LK2"],0:["LB","LK3"],1:["LD","LK2"],2:[],3:["LW","LK1"],4:["LO","LK1"],5:["LC","LK3"]}}
+  artur:{n:"Artur",list:["A","B","C","D","E1","E2","E3","R1","R4","RZ","R3","RW"],def:{0:["RW"],1:["A"],2:["R1"],3:["B"],4:["R4"],5:["C"],6:["D","R3"]}},
+  laila:{n:"Laila",list:["LA","LB","LD","LW","LO","LC","LE","LK2","LK3","LK1"],def:{6:["LA","LK2"],0:["LB","LK3"],1:["LD","LK2"],2:[],3:["LW","LK1"],4:["LO","LK1"],5:["LC","LK3"]}}
 };
 const DN=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const DFULL=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
@@ -460,7 +476,7 @@ function prevSets(exId,beforeId){
   return arr[0]?arr[0].sets[exId]:null;
 }
 function lastDone(wid){const a=mine().filter(l=>l.w===wid&&hasData(l)).sort((a,b)=>b.date.localeCompare(a.date));return a[0]?a[0].date:null}
-function plan(dow,u=user){const s=sched[u];if(s&&s[dow]!==undefined)return s[dow].filter(w=>W[w]&&W[w].u===u);return USERS[u].def[dow]||[]}
+function plan(dow,u=user){const s=sched[u];if(s&&s[dow]!==undefined)return s[dow].filter(w=>W[w]&&W[w].u===u);if(typeof D30DEF!=="undefined"&&inD30()&&D30DEF[u])return D30DEF[u][dow]||[];return USERS[u].def[dow]||[]}
 
 /* ---------- estado de tela ---------- */
 let view={name:"home"};let cur=null;let selDow=null;
@@ -484,6 +500,7 @@ function render(){
   else if(view.name==="diet")app.innerHTML=dietView();
   else if(view.name==="health")app.innerHTML=healthView();
   else if(view.name==="rank")app.innerHTML=rankView();
+  else if(view.name==="d30")app.innerHTML=d30View();
   else if(view.name==="gworkout")app.innerHTML=gworkout();
   xpCheck();
 }
@@ -518,7 +535,7 @@ function home(){
     list+=`<button class="item" data-act="open" data-v="${w}"><span class="letter${isRun(w)?" run":""}">${W[w].k}</span><div><strong>${W[w].n} <span style="color:var(--muted);font-weight:400">${W[w].s}</span></strong><small>${ld?"Última vez: "+br(ld):"Ainda não feito"}</small></div><span>›</span></button>`;
   });
   const St=stats(),Lv=lvl(St.xp),TX=(St.dx[t]||dayXP(t));
-  return hdr("TURUGYM")+`<main>${userPills()}${new Date().getDay()===1?`<button class="hchip" data-act="tab" data-v="health">📊 O resumo da semana passada chegou ›</button>`:""}<button class="hchip" data-act="hchip">🔥 ${St.st} ${St.st===1?"dia":"dias"} · Nível ${Lv.n} ${Lv.title} · hoje +${TX.xp} XP ›</button><div class="week">${week}</div>${card}<button class="btn ghost" data-act="g-open" style="margin:0 0 18px">👥 Treinar junto (mesma tela)</button><h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div>${together()}</main>`;
+  return hdr("TURUGYM")+`<main>${userPills()}${d30card()}${new Date().getDay()===1?`<button class="hchip" data-act="tab" data-v="health">📊 O resumo da semana passada chegou ›</button>`:""}<button class="hchip" data-act="hchip">🔥 ${St.st} ${St.st===1?"dia":"dias"} · Nível ${Lv.n} ${Lv.title} · hoje +${TX.xp} XP ›</button><div class="week">${week}</div>${card}<button class="btn ghost" data-act="g-open" style="margin:0 0 18px">👥 Treinar junto (mesma tela)</button><h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div>${together()}</main>`;
 }
 function together(){
   const o=["artur","laila"].find(k=>k!==user&&USERS[k].list!==USERS[user].list);if(!o)return"";
@@ -789,7 +806,8 @@ function badges(St){
     {ico:"💧",t:"Hidratado",s:Math.min(wN,7)+"/7",ok:wN>=7},
     {ico:"😴",t:"Bem dormido",s:Math.min(sN,7)+"/7",ok:sN>=7},
     {ico:"🔥",t:"Sequência 7",s:"melhor "+St.best,ok:St.best>=7},
-    {ico:"🌋",t:"Sequência 30",s:"melhor "+St.best,ok:St.best>=30}];
+    {ico:"🌋",t:"Sequência 30",s:"melhor "+St.best,ok:St.best>=30},
+    {ico:"🏆",t:"Desafio 30 dias",s:D30.users.includes(user)?d30status(user).done+"/30":"–",ok:D30.users.includes(user)&&d30status(user).finished}];
 }
 let lastXP=null,lastUser=null;
 function levelUp(n){try{unlockAudio();[523,659,784,1046].forEach((f,i)=>tone(f,.18,i*.15,.45))}catch(e){}const f=$("#flash");f.querySelector("b").textContent="Nível "+n+"! "+LV[Math.min(n-1,LV.length-1)];f.classList.add("show");clearTimeout(alarm.h);alarm.h=setTimeout(()=>f.classList.remove("show"),3500)}
@@ -1070,6 +1088,59 @@ function gConfirm(){
   toast(W[grp.w].n+" salvo para "+need.map(u=>USERS[u].n).join(" e ")+" 💪");grp=null;go({name:"home"});
 }
 
+/* ---------- desafio 30 dias ---------- */
+const D30={start:"2026-11-21",days:30,users:["artur","laila"],jokers:4};
+const D30DEF={
+  artur:{0:["E1","RW"],1:["A","RZ"],2:["E2","R1"],3:["B","RZ"],4:["E3","R4"],5:["C","RZ"],6:["D","R3"]},
+  laila:{6:["LA","LK2"],0:["LB","LK3"],1:["LD","LK2"],2:["LE","LK2"],3:["LW","LK1"],4:["LO","LK1"],5:["LC","LK3"]}
+};
+const d30end=()=>addDays(D30.start,D30.days-1);
+const inD30=(d=today())=>d>=D30.start&&d<=d30end();
+function d30day(u,d){return asUser(u,()=>{
+  const L=mine().filter(l=>l.date===d&&hasData(l)&&W[l.w]);
+  const gym=L.some(l=>!isRun(l.w));
+  const cmin=Math.round(L.filter(l=>isRun(l.w)&&l.done).reduce((a,l)=>a+phases(l.w).reduce((b,p)=>b+p.d,0),0)/60);
+  const P=DIET[u],x=dpeek(d)||{};
+  const agua=(x.w||0)>=P.water,sono=x.sl!=null&&x.sl>=P.sleep,prot=P.meals?protOf(x,P)>=P.p*0.9:!!(x.s&&x.s._prot),card=cmin>=20;
+  return{gym,card,cmin,agua,sono,prot,pts:(gym?3:0)+(card?3:0)+(agua?1:0)+(sono?1:0)+(prot?1:0)};
+})}
+function d30status(u){
+  let used=0,lost=false;const days=[];
+  for(let i=0;i<D30.days;i++){const d=addDays(D30.start,i);
+    if(d>today()){days.push({d,st:"fut",pts:0});continue}
+    const r=d30day(u,d);let st;
+    if(r.gym&&r.card)st="ok";else if(d===today())st="hoje";else if(used<D30.jokers){used++;st="jk"}else{st="x";lost=true}
+    days.push({d,st,...r});}
+  return{days,used,lost,pts:days.reduce((a,x)=>a+(x.pts||0),0),done:days.filter(x=>x.st==="ok").length,finished:today()>d30end()&&!lost};
+}
+function d30card(){
+  if(!inD30()||!D30.users.includes(user))return"";
+  const n=Math.round((new Date(today()+"T12:00:00")-new Date(D30.start+"T12:00:00"))/864e5)+1,r=d30day(user,today());
+  return`<button class="d30card" data-act="tab" data-v="d30"><span class="d30n">${n}<small>/30</small></span><div><strong>Desafio 30 dias</strong><small>Hoje: ${r.gym?"✅":"⬜"} treino · ${r.card?"✅":"⬜"} cardio ${r.cmin?"("+r.cmin+" min)":""} · ${r.pts}/9 pts</small></div><span>›</span></button>`;
+}
+function d30View(){
+  const n=Math.min(D30.days,Math.max(0,Math.round((new Date(today()+"T12:00:00")-new Date(D30.start+"T12:00:00"))/864e5)+1));
+  let h=hdr("Desafio 30 dias",`${br(D30.start)} a ${br(d30end())} · ${today()<D30.start?"começa em breve":today()>d30end()?"encerrado":"dia "+n+" de 30"}`,"home")+`<main>`;
+  h+=`<p class="note"><b>Regra:</b> todo dia, musculação + pelo menos 20 min de cardio. <b>Pontos:</b> treino 3 · cardio 3 · água 1 · sono 7h 1 · proteína 1 (máx. 9 por dia). <b>Coringas:</b> cada um tem 4; um dia sem treino ou sem cardio gasta 1 automaticamente. Sem coringa, o desafio cai, mas os pontos continuam contando. Só pela glória 🏆</p>`;
+  const S=D30.users.map(u=>({u,...d30status(u)})).sort((a,b)=>b.pts-a.pts);
+  S.forEach((s,i)=>{
+    const st=s.finished?"🏆 Desafio concluído!":s.lost?"❌ Caiu do desafio (pontos seguem valendo)":`🃏 ${D30.jokers-s.used} ${D30.jokers-s.used===1?"coringa":"coringas"} restantes`;
+    h+=`<div class="chart d30p${i===0&&s.pts>0?" lead":""}"><div class="hrow"><div><strong style="font-size:18px">${i===0&&s.pts>0?"👑 ":""}${esc(USERS[s.u].n)}${s.u===user?' <span class="you">você</span>':""}</strong><small style="display:block;color:var(--muted)">✅ ${s.done} dias completos · ${st}</small></div><span class="rxp">${s.pts}<small>pts</small></span></div><div class="d30grid">${s.days.map((x,j)=>`<span class="d30c ${x.st}" title="${br(x.d)}">${x.st==="ok"?"✅":x.st==="jk"?"🃏":x.st==="x"?"❌":x.st==="hoje"?"⏳":j+1}</span>`).join("")}</div></div>`;
+  });
+  if(D30.users.includes(user)&&inD30()){
+    const r=d30day(user,today()),pl=plan(new Date().getDay()),g=pl.find(w=>!isRun(w)),c=pl.find(w=>isRun(w));
+    const it=(ok,ico,t,s,a)=>`<button class="item mis${ok?" on":""}" ${a}><span class="mico">${ok?"✓":ico}</span><div><strong>${t}</strong><small>${s}</small></div></button>`;
+    h+=`<h2 class="section-title" style="margin-top:20px">Seu dia ${n}</h2><div class="list">`+
+      it(r.gym,"🏋️","Musculação · 3 pts",g?W[g].n+" · "+W[g].s:"Qualquer treino do app",g?`data-act="open" data-v="${g}"`:`data-act="tab" data-v="home"`)+
+      it(r.card,"🏃","Cardio 20 min · 3 pts",r.cmin?r.cmin+" min feitos hoje":c?W[c].n:"Qualquer cardio do app",c?`data-act="open" data-v="${c}"`:`data-act="tab" data-v="home"`)+
+      it(r.agua,"💧","Água · 1 pt","Meta do dia na aba Missões",`data-act="tab" data-v="diet"`)+
+      it(r.sono,"😴","Sono de 7h · 1 pt","Registre na aba Missões",`data-act="tab" data-v="diet"`)+
+      it(r.prot,"🍗","Proteína · 1 pt",DIET[user].meals?"Marque as refeições na aba Missões":"Toque quando bater ~135 g de proteína",DIET[user].meals?`data-act="tab" data-v="diet"`:`data-act="d30-prot"`)+`</div>`;
+  }
+  h+=`<p class="hint" style="margin-top:12px">Nos 30 dias, a semana de cada um ganhou treinos extras curtos e leves nos dias que eram de descanso, para treinar todo dia sem acumular cansaço. Treinos leves: pare com 3 reps sobrando.</p>`;
+  return h+`</main>`;
+}
+
 /* ---------- sync GitHub ---------- */
 const GH={owner:"aarturaraujob-collab",repo:"turugym",path:"data/turugym.json",branch:"data"};
 const LSG="th_gh_token",LSDEAD="th_dead_v1";
@@ -1173,6 +1244,7 @@ document.addEventListener("click",e=>{
   if(act==="react"){const id=b.dataset.id,k="r|"+id+"|"+user,cur=hget(k);if(cur&&cur.e===v)hsave(k,null);else hsave(k,{e:v});render();return}
   if(act==="bet-open"){const ym=today().slice(0,7),bt=hget("bet|"+ym);openModal(`<h2>Aposta do mês</h2><p>O que quem ficar em último no ranking de ${MES[+ym.slice(5)-1]} vai pagar?</p><input id="betIn" maxlength="120" placeholder="Ex.: açaí de 500 ml para todo mundo" value="${esc(bt&&bt.txt||"")}"><button class="btn" data-act="bet-save">Salvar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
   if(act==="bet-save"){const t=($("#betIn").value||"").trim();hsave("bet|"+today().slice(0,7),t?{txt:t,by:user}:null);closeModal();render();toast(t?"Aposta valendo! 💰":"Aposta removida");return}
+  if(act==="d30-prot"){const d=dget();d.s._prot=!d.s._prot;dsave();render();return}
   if(act==="rank-mode"){rankMode=v;render();return}
   if(act==="u-add"){addUserModal();return}
   if(act==="u-save"){const n=($("#uName").value||"").trim(),k=ukey(n);if(!k){$("#uErr").textContent="Digite um nome.";return}if(USERS[k]){$("#uErr").textContent="Já existe alguém com esse nome.";return}hsave("user|"+k,{n,base:$("#uBase").value});loadDynUsers();user=k;try{localStorage.setItem(LSU,k)}catch(e){}closeModal();R=null;render();toast(n+" entrou no TURUGYM 🐊");return}
