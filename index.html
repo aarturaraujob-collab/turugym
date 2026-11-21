@@ -366,6 +366,8 @@ const W={
     {id:"remch",r:[12,12,12,12],rg:"10–12",rest:90,h:1,sug:16},
     {id:"facepull",r:[15,15,15],rg:"12–15",rest:60,sug:20},
     {id:"elfrp",r:[12,12,12],rg:"10–12",rest:60,sug:10}]},
+  EK2:{u:"ester",k:"20",ico:"🚶",n:"Cardio moderado 20 min",s:"Depois da musculação",phases:[{z:2,d:1200,l:"Cardio moderado"}],note:"Esforço 4–6 de 10: respira mais rápido, mas ainda conversa. Bike, elíptico ou caminhada."},
+  EK3:{u:"ester",k:"30",ico:"🚶",n:"Cardio moderado 30 min",s:"Dia sem musculação",phases:[{z:2,d:1800,l:"Cardio moderado"}],note:"Esforço 4–6 de 10: respira mais rápido, mas ainda conversa. Bike, elíptico ou caminhada."},
   LA:{u:"laila",k:"IA",n:"Inferiores A",s:"Posteriores, glúteos e quadríceps",warm:"Alguns minutos de movimento leve + 1–2 séries leves no stiff (não contam). Primeiras 2 semanas: priorize técnica e recuperação; se precisar, tire uma série dos exercícios de 3. Depois, 1–2 reps sobrando. Depois, 20 min de cardio moderado (Zona 2).",ex:[
     {id:"stiffl",r:[10,10,10],rg:"6–10",rest:150,tag:"Principal do dia"},
     {id:"flex",r:[12,12,12],rg:"8–12",rest:90},
@@ -414,7 +416,7 @@ const W={
 const USERS={
   artur:{n:"Artur",list:["A","B","C","D","E1","E2","E3","R1","R4","RZ","R3","RW"],def:{0:["RW"],1:["A"],2:["R1"],3:["B"],4:["R4"],5:["C"],6:["D","R3"]}},
   laila:{n:"Laila",list:["LA","LB","LD","LW","LO","LC","LE","LK2","LK3","LK1"],def:{6:["LA","LK2"],0:["LB","LK3"],1:["LD","LK2"],2:[],3:["LW","LK1"],4:["LO","LK1"],5:["LC","LK3"]}},
-  ester:{n:"Ester",list:["EA","ED","EC","EB"],def:{1:["EA"],2:["ED"],3:["EC"],4:["EB"],5:[],6:[],0:[]}}
+  ester:{n:"Ester",list:["EA","ED","EC","EB","EK2","EK3"],def:{1:["EA"],2:["ED"],3:["EC"],4:["EB"],5:[],6:[],0:[]}}
 };
 const DN=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const DFULL=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
@@ -1118,10 +1120,11 @@ function gConfirm(){
 }
 
 /* ---------- desafio 30 dias ---------- */
-const D30={start:"2026-11-21",days:30,users:["artur","laila"],jokers:4};
+const D30={start:"2026-11-21",days:30,users:["artur","laila","ester"],jokers:4};
 const D30DEF={
   artur:{0:["E1","RW"],1:["A","RZ"],2:["E2","R1"],3:["B","RZ"],4:["E3","R4"],5:["C","RZ"],6:["D","R3"]},
-  laila:{6:["LA","LK2"],0:["LB","LK3"],1:["LD","LK2"],2:["LE","LK2"],3:["LW","LK1"],4:["LO","LK1"],5:["LC","LK3"]}
+  laila:{6:["LA","LK2"],0:["LB","LK3"],1:["LD","LK2"],2:["LE","LK2"],3:["LW","LK1"],4:["LO","LK1"],5:["LC","LK3"]},
+  ester:{1:["EA","EK2"],2:["ED","EK2"],3:["EC","EK2"],4:["EB","EK2"],5:["EK3"],6:["EK3"],0:["EK3"]}
 };
 const d30end=()=>addDays(D30.start,D30.days-1);
 const inD30=(d=today())=>d>=D30.start&&d<=d30end();
