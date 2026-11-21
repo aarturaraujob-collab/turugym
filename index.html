@@ -1109,19 +1109,19 @@ function d30status(u){
   for(let i=0;i<D30.days;i++){const d=addDays(D30.start,i);
     if(d>today()){days.push({d,st:"fut",pts:0});continue}
     const r=d30day(u,d);let st;
-    if(r.gym&&r.card)st="ok";else if(d===today())st="hoje";else if(used<D30.jokers){used++;st="jk"}else{st="x";lost=true}
+    if(r.gym||r.card)st="ok";else if(d===today())st="hoje";else if(used<D30.jokers){used++;st="jk"}else{st="x";lost=true}
     days.push({d,st,...r});}
   return{days,used,lost,pts:days.reduce((a,x)=>a+(x.pts||0),0),done:days.filter(x=>x.st==="ok").length,finished:today()>d30end()&&!lost};
 }
 function d30card(){
   if(!inD30()||!D30.users.includes(user))return"";
   const n=Math.round((new Date(today()+"T12:00:00")-new Date(D30.start+"T12:00:00"))/864e5)+1,r=d30day(user,today());
-  return`<button class="d30card" data-act="tab" data-v="d30"><span class="d30n">${n}<small>/30</small></span><div><strong>Desafio 30 dias</strong><small>Hoje: ${r.gym?"✅":"⬜"} treino · ${r.card?"✅":"⬜"} cardio ${r.cmin?"("+r.cmin+" min)":""} · ${r.pts}/9 pts</small></div><span>›</span></button>`;
+  return`<button class="d30card" data-act="tab" data-v="d30"><span class="d30n">${n}<small>/30</small></span><div><strong>Desafio 30 dias</strong><small>${r.gym||r.card?"✅ Dia garantido":"⬜ Falta treino ou cardio"} · ${r.gym?"✅":"⬜"} treino · ${r.card?"✅":"⬜"} cardio · ${r.pts}/9 pts</small></div><span>›</span></button>`;
 }
 function d30View(){
   const n=Math.min(D30.days,Math.max(0,Math.round((new Date(today()+"T12:00:00")-new Date(D30.start+"T12:00:00"))/864e5)+1));
   let h=hdr("Desafio 30 dias",`${br(D30.start)} a ${br(d30end())} · ${today()<D30.start?"começa em breve":today()>d30end()?"encerrado":"dia "+n+" de 30"}`,"home")+`<main>`;
-  h+=`<p class="note"><b>Regra:</b> todo dia, musculação + pelo menos 20 min de cardio. <b>Pontos:</b> treino 3 · cardio 3 · água 1 · sono 7h 1 · proteína 1 (máx. 9 por dia). <b>Coringas:</b> cada um tem 4; um dia sem treino ou sem cardio gasta 1 automaticamente. Sem coringa, o desafio cai, mas os pontos continuam contando. Só pela glória 🏆</p>`;
+  h+=`<p class="note"><b>Check do dia:</b> treino <b>ou</b> cardio (20 min) já vale o dia ✅. O resto é bônus. <b>Pontos:</b> treino 3 · cardio 3 · água 1 · sono 7h 1 · proteína 1 (máx. 9 por dia). <b>Coringas:</b> cada um tem 4; um dia sem treino e sem cardio gasta 1 automaticamente. Sem coringa, o desafio cai, mas os pontos continuam contando. Só pela glória 🏆</p>`;
   const S=D30.users.map(u=>({u,...d30status(u)})).sort((a,b)=>b.pts-a.pts);
   S.forEach((s,i)=>{
     const st=s.finished?"🏆 Desafio concluído!":s.lost?"❌ Caiu do desafio (pontos seguem valendo)":`🃏 ${D30.jokers-s.used} ${D30.jokers-s.used===1?"coringa":"coringas"} restantes`;
