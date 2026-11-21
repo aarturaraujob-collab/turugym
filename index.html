@@ -293,7 +293,7 @@ const EX={
   supart:{n:"Supino inclinado articulado"},remm:{n:"Remada máquina pegada neutra"},desm:{n:"Desenvolvimento máquina"},
   martelo:{n:"Rosca martelo c/ halteres"},puxab:{n:"Puxada aberta"},rembt:{n:"Remada baixa c/ triângulo"},
   cruinvm:{n:"Crucifixo inverso máquina"},testa:{n:"Tríceps testa na polia c/ corda"},roscacorda:{n:"Rosca martelo na polia c/ corda"},
-  bulg:{n:"Búlgaro"},peck:{n:"Voador (peck deck)"},ellp:{n:"Elevação lateral na polia"},pullover:{n:"Pullover na polia com corda"},scott:{n:"Rosca Scott na máquina"},triuni:{n:"Tríceps unilateral na polia"},stiffsm:{n:"Stiff no smith"},bulgsm:{n:"Afundo búlgaro no Smith"},coice:{n:"Coice de glúteo na polia"},afrev:{n:"Afundo reverso no Smith"},stiffl:{n:"Stiff"},pantem:{n:"Panturrilha em pé na máquina"},pantsent:{n:"Panturrilha sentada"},abdpolia:{n:"Abdominal na polia alta"},woodchop:{n:"Woodchopper na polia"},infra:{n:"Abdominal infra / elevação de quadril",t:"bw"},extuni:{n:"Cadeira extensora unilateral"},
+  bulg:{n:"Búlgaro"},peck:{n:"Voador (peck deck)"},ellp:{n:"Elevação lateral na polia"},pullover:{n:"Pullover na polia com corda"},scott:{n:"Rosca Scott na máquina"},triuni:{n:"Tríceps unilateral na polia"},stiffsm:{n:"Stiff no smith"},bulgsm:{n:"Afundo búlgaro no Smith"},coice:{n:"Coice de glúteo na polia"},afrev:{n:"Afundo reverso no Smith"},stiffl:{n:"Stiff"},pantem:{n:"Panturrilha em pé na máquina"},pantsent:{n:"Panturrilha sentada"},abdpolia:{n:"Abdominal na polia alta"},woodchop:{n:"Woodchopper na polia"},infra:{n:"Abdominal infra / elevação de quadril",t:"bw"},extuni:{n:"Cadeira extensora unilateral"},haunil:{n:"Agachamento unilateral no hack"},afstep:{n:"Afundo com step na frente"},arnold:{n:"Desenvolvimento Arnold sentado"},tricfran:{n:"Tríceps francês com anilha"},stiffbl:{n:"Stiff com barra livre"},flexq:{n:"Flexão de quadril em pé com caneleira"},pulldab:{n:"Pulldown barra aberta"},remch:{n:"Remada curvada com halteres (pegada neutra)"},facepull:{n:"Face pull"},elfrp:{n:"Elevação frontal na polia com corda"},
   hipm:{n:"Hip thrust na máquina"},stiffh:{n:"Stiff com halteres"},mesaflex:{n:"Mesa ou cadeira flexora"},
   afundo:{n:"Afundo no Smith ou búlgaro"},puxfr:{n:"Puxada frontal na polia"},remsp:{n:"Remada sentada na polia"},
   roscah:{n:"Rosca bíceps com halteres"},supincm:{n:"Supino inclinado na máquina"},remap:{n:"Remada com apoio no peito"},
@@ -342,6 +342,29 @@ const W={
   R2:{u:"artur",k:"1:2",ico:"🏃",n:"Corrida 1:2 (pausada)",s:"Volta quando o médico liberar",run:[45,90]},
   R3:{u:"artur",k:"Z2",ico:"🏃",n:"Cardio Z2 25 min",s:"Depois do treino de perna",phases:[{z:1,d:180,l:"Aquecimento leve"},{z:2,d:1200,l:"Z2 contínuo"},{z:1,d:120,l:"Desaquecimento"}],note:ZNOTE},
   RW:{u:"artur",k:"🚶",ico:"🚶",n:"Caminhada 40 min",s:"Z2, ritmo de conversa",phases:[{z:2,d:2400,l:"Caminhada Z2"}],note:ZNOTE},
+  EA:{u:"ester",k:"A",n:"Treino A",s:"Quadríceps",warm:"Alguns minutos de bike leve + 1–2 séries leves na extensora. Cargas sugeridas a partir dos treinos que você já fazia. Termine cada série com 1–2 reps sobrando.",ex:[
+    {id:"ext",r:[10,10,10,10],rg:"8–12",rest:90,sug:20},
+    {id:"extuni",r:[10,10,10],rg:"8–12 por perna",rest:60,sug:10},
+    {id:"haunil",r:[10,10,10],rg:"8–12 por perna",rest:90,sug:10},
+    {id:"lp45",r:[10,10,10,10],rg:"8–12",rest:120,sug:110,tag:"Principal do dia"},
+    {id:"afstep",r:[8,8,8],rg:"8–10 por perna",rest:90,h:1,sug:5}]},
+  ED:{u:"ester",k:"D",n:"Treino D",s:"Peito, ombro e tríceps",warm:"Mobilidade de ombro + 1–2 séries leves no supino. Cargas sugeridas a partir dos treinos que você já fazia. Termine cada série com 1–2 reps sobrando.",ex:[
+    {id:"supincm",r:[10,10,10,10],rg:"8–12",rest:120,sug:8,tag:"Principal do dia"},
+    {id:"peck",r:[10,10,10,10],rg:"10–12",rest:75,sug:20},
+    {id:"arnold",r:[10,10,10],rg:"8–12",rest:90,h:1,sug:4},
+    {id:"tricorda",r:[10,10,10,10],rg:"10–12",rest:60,sug:20},
+    {id:"tricfran",r:[12,12,12],rg:"10–12",rest:60,sug:5}]},
+  EC:{u:"ester",k:"C",n:"Treino C",s:"Glúteos e posteriores",warm:"Alguns minutos de bike leve + 1–2 séries leves no hack. Cargas sugeridas a partir dos treinos que você já fazia. Termine cada série com 1–2 reps sobrando.",ex:[
+    {id:"hack",r:[10,10,10,10],rg:"8–12",rest:120,sug:60,tag:"Principal do dia"},
+    {id:"stiffbl",r:[12,12,12,12],rg:"10–12",rest:120,sug:30},
+    {id:"abd",r:[15,15,15,15],rg:"12–15",rest:60,sug:25},
+    {id:"flexq",r:[12,12,12],rg:"12 por perna",rest:45,sug:3}]},
+  EB:{u:"ester",k:"B",n:"Treino B",s:"Costas e ombros",warm:"Mobilidade de ombro + 1–2 séries leves na puxada. Cargas sugeridas a partir dos treinos que você já fazia. Termine cada série com 1–2 reps sobrando.",ex:[
+    {id:"puxfr",r:[12,12,12,12],rg:"10–12",rest:90,sug:20,tag:"Principal do dia. Pegada aberta neutra"},
+    {id:"pulldab",r:[15,15,15],rg:"12–15",rest:75,sug:20},
+    {id:"remch",r:[12,12,12,12],rg:"10–12",rest:90,h:1,sug:16},
+    {id:"facepull",r:[15,15,15],rg:"12–15",rest:60,sug:20},
+    {id:"elfrp",r:[12,12,12],rg:"10–12",rest:60,sug:10}]},
   LA:{u:"laila",k:"IA",n:"Inferiores A",s:"Posteriores, glúteos e quadríceps",warm:"Alguns minutos de movimento leve + 1–2 séries leves no stiff (não contam). Primeiras 2 semanas: priorize técnica e recuperação; se precisar, tire uma série dos exercícios de 3. Depois, 1–2 reps sobrando. Depois, 20 min de cardio moderado (Zona 2).",ex:[
     {id:"stiffl",r:[10,10,10],rg:"6–10",rest:150,tag:"Principal do dia"},
     {id:"flex",r:[12,12,12],rg:"8–12",rest:90},
@@ -389,7 +412,8 @@ const W={
 };
 const USERS={
   artur:{n:"Artur",list:["A","B","C","D","E1","E2","E3","R1","R4","RZ","R3","RW"],def:{0:["RW"],1:["A"],2:["R1"],3:["B"],4:["R4"],5:["C"],6:["D","R3"]}},
-  laila:{n:"Laila",list:["LA","LB","LD","LW","LO","LC","LE","LK2","LK3","LK1"],def:{6:["LA","LK2"],0:["LB","LK3"],1:["LD","LK2"],2:[],3:["LW","LK1"],4:["LO","LK1"],5:["LC","LK3"]}}
+  laila:{n:"Laila",list:["LA","LB","LD","LW","LO","LC","LE","LK2","LK3","LK1"],def:{6:["LA","LK2"],0:["LB","LK3"],1:["LD","LK2"],2:[],3:["LW","LK1"],4:["LO","LK1"],5:["LC","LK3"]}},
+  ester:{n:"Ester",list:["EA","ED","EC","EB"],def:{1:["EA"],2:["ED"],3:["EC"],4:["EB"],5:[],6:[],0:[]}}
 };
 const DN=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const DFULL=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
@@ -742,6 +766,7 @@ const DIET={
       {id:"b12",n:"B12 (MecoBe)",d:"Conte ao médico que está tomando."},
       {id:"whey",n:"Whey (opcional)",d:"1 scoop no pré-treino ou no lanche, quando faltar proteína.",opt:1}],
     rules:["Não corte o sal: use normalmente na comida.","Café só até as 14h.","Telas desligadas 30 min antes de deitar. Meta: deitar 23h30.","Dia sem treino: pode juntar o pré-treino com o café.","Tontura ou cansaço forte: não treine em jejum e procure o médico."]},
+  ester:{water:10,sleep:7,cardioWeek:90,meals:null,sups:[],rules:["Plano alimentar ainda não montado: peça no Claude com peso, altura, rotina e objetivo.","Meta provisória de água: 2,5 L por dia.","Meta de sono: 7 horas."]},
   laila:{water:10,sleep:7,cardioWeek:150,meals:null,sups:[],
     rules:["Calorias: 1.650–1.700 kcal/dia (estimativa inicial, déficit moderado).","Proteína: cerca de 135 g/dia.","Água: 2,5 L por dia. Sono: 7 horas.","Passos: primeiro alvo 4.000/dia, depois 5.000. Caminhadas de 5–10 min depois das refeições ajudam.","Cardio: 150 min por semana em Zona 2, depois de cada treino. Terça é descanso completo.","Acompanhe a média semanal do peso e as medidas a cada 3–4 semanas."]}
 };
@@ -837,7 +862,8 @@ function dietView(){
 const LSH="th_health_v1";let hl={};let hWeek=-1;
 const HDEF={
   artur:{start:96,goal:84,meds:[{id:"tirz",n:"Tirzepatida 5 mg",freq:"w",dow:1,time:"09:00",note:"Converse com o médico sobre o uso e a procedência."}]},
-  laila:{start:null,goal:null,meds:[]}
+  laila:{start:null,goal:null,meds:[]},
+  ester:{start:null,goal:null,meds:[]}
 };
 const SYMS=["Tontura","Cansaço","Enjoo","Dor de cabeça","Sem apetite","Intestino preso","Diarreia","Azia","Insônia"];
 const DOWF=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
