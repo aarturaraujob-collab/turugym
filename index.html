@@ -161,6 +161,7 @@ button.day{font:inherit;width:100%}
 .chips button.on{border-color:var(--pri-text);background:var(--soft);font-weight:600}
 .chips button.on::after{content:"✓";margin-left:auto;color:var(--pri-text)}
 .row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.remgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.remgrid a{display:block;text-align:center;text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:12px 8px;font-weight:600}.remgrid a:first-child{grid-column:1/-1;background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}
 .d30card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:linear-gradient(135deg,var(--pri),var(--frost));color:var(--pri-ink);border-radius:16px;padding:12px 14px;margin:0 0 12px}
 .d30card strong{display:block;font:800 20px "Saira Condensed",sans-serif;text-transform:uppercase}.d30card small{font-size:13px}.d30card div{flex:1}
 .d30n{font:800 34px "Saira Condensed",sans-serif;line-height:1}.d30n small{font-size:14px;opacity:.7}
@@ -854,6 +855,8 @@ function dietView(){
   if(P.sups.length)h+=`<h2 class="section-title" id="sec-sup" style="margin-top:20px">Suplementos</h2><div class="list">`+P.sups.map(s=>`<button class="item check${d.s[s.id]?" on":""}" data-act="diet-sup" data-v="${s.id}"><span class="box">${d.s[s.id]?"✓":""}</span><div><strong>${s.n}</strong>${s.d?`<small>${s.d}</small>`:""}</div></button>`).join("")+`</div>`;
   h+=`<h2 class="section-title" id="sec-sleep" style="margin-top:20px">Sono</h2><div class="sleep"><label for="sleepIn">Horas dormidas esta noite</label><input id="sleepIn" inputmode="decimal" value="${d.sl??""}" placeholder="meta ${P.sleep}h"></div>`;
   h+=`<h2 class="section-title" style="margin-top:20px">Conquistas</h2><div class="badges">`+badges(St).map(b=>`<div class="badge${b.ok?" ok":""}"><span>${b.ico}</span><b>${b.t}</b><small>${b.s}</small></div>`).join("")+`</div>`;
+  const LB="https://aarturaraujob-collab.github.io/turugym/lembretes/";
+  h+=`<h2 class="section-title" style="margin-top:20px">⏰ Lembretes no celular</h2><p class="hint" style="margin:-4px 2px 8px">Toque e escolha "Adicionar todos". Eles entram no Calendário e tocam mesmo com o celular bloqueado. Valem para qualquer pessoa.</p><div class="remgrid"><a href="${LB}tudo.ics">⭐ Todos</a><a href="${LB}agua.ics">💧 Água 5×/dia</a><a href="${LB}lanche.ics">🍗 Lanche 16h</a><a href="${LB}sono.ics">😴 Deitar 23h</a><a href="${LB}checkin.ics">📲 Check-in 21h30</a></div>`;
   h+=`<h2 class="section-title" style="margin-top:20px">Regras do plano</h2><p class="note">${P.rules.map(r=>"• "+r).join("<br>")}</p>`;
   return h+`</main>`;
 }
