@@ -161,6 +161,11 @@ button.day{font:inherit;width:100%}
 .chips button.on{border-color:var(--pri-text);background:var(--soft);font-weight:600}
 .chips button.on::after{content:"✓";margin-left:auto;color:var(--pri-text)}
 .row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tin{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:0 12px;font:500 16px "Saira",sans-serif}
+.wrow{align-items:center;padding:8px 10px}.wmain{flex:1;border:0;background:none;text-align:left;padding:4px;min-width:0}.wmain strong{display:block;font-weight:600}.wmain small{color:var(--muted)}
+.wbtns{display:grid;grid-template-columns:repeat(2,34px);gap:4px}.wbtns button{width:34px;height:34px;border:1px solid var(--line);background:var(--bg);border-radius:9px;font-weight:700}.wbtns button:disabled{opacity:.3}
+.libg{margin:10px 0}.libl{max-height:42vh;overflow-y:auto;margin-bottom:8px}.libgo{font-weight:800;color:var(--pri-text);font-size:18px}
+.modal-in .row-btns input{width:100%}
 .remgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.remgrid a{display:block;text-align:center;text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:12px 8px;font-weight:600}.remgrid a:first-child{grid-column:1/-1;background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}
 .d30card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:linear-gradient(135deg,var(--pri),var(--frost));color:var(--pri-ink);border-radius:16px;padding:12px 14px;margin:0 0 12px}
 .d30card strong{display:block;font:800 20px "Saira Condensed",sans-serif;text-transform:uppercase}.d30card small{font-size:13px}.d30card div{flex:1}
@@ -528,6 +533,7 @@ function render(){
   else if(view.name==="health")app.innerHTML=healthView();
   else if(view.name==="rank")app.innerHTML=rankView();
   else if(view.name==="d30")app.innerHTML=d30View();
+  else if(view.name==="wedit")app.innerHTML=weditView();
   else if(view.name==="gworkout")app.innerHTML=gworkout();
   xpCheck();
 }
@@ -562,7 +568,7 @@ function home(){
     list+=`<button class="item" data-act="open" data-v="${w}"><span class="letter${isRun(w)?" run":""}">${W[w].k}</span><div><strong>${W[w].n} <span style="color:var(--muted);font-weight:400">${W[w].s}</span></strong><small>${ld?"Última vez: "+br(ld):"Ainda não feito"}</small></div><span>›</span></button>`;
   });
   const St=stats(),Lv=lvl(St.xp),TX=(St.dx[t]||dayXP(t));
-  return hdr("TURUGYM")+`<main>${userPills()}${d30card()}${new Date().getDay()===1?`<button class="hchip" data-act="tab" data-v="health">📊 O resumo da semana passada chegou ›</button>`:""}<button class="hchip" data-act="hchip">🔥 ${St.st} ${St.st===1?"dia":"dias"} · Nível ${Lv.n} ${Lv.title} · hoje +${TX.xp} XP ›</button><div class="week">${week}</div>${card}<button class="btn ghost" data-act="g-open" style="margin:0 0 18px">👥 Treinar junto (mesma tela)</button><h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div>${together()}</main>`;
+  return hdr("TURUGYM")+`<main>${userPills()}${d30card()}${new Date().getDay()===1?`<button class="hchip" data-act="tab" data-v="health">📊 O resumo da semana passada chegou ›</button>`:""}<button class="hchip" data-act="hchip">🔥 ${St.st} ${St.st===1?"dia":"dias"} · Nível ${Lv.n} ${Lv.title} · hoje +${TX.xp} XP ›</button><div class="week">${week}</div>${card}<button class="btn ghost" data-act="g-open" style="margin:0 0 18px">👥 Treinar junto (mesma tela)</button><h2 class="section-title">Fazer outro treino agora</h2><div class="list">${list}</div><div class="row-btns" style="margin-top:8px"><button class="btn ghost" data-act="w-new">+ Criar treino</button><button class="btn ghost" data-act="lib-browse">📚 Biblioteca</button></div>${together()}</main>`;
 }
 function together(){
   const o=["artur","laila"].find(k=>k!==user&&USERS[k].list!==USERS[user].list);if(!o)return"";
@@ -571,6 +577,7 @@ function together(){
 function workout(){
   const w=W[cur.w],l=cur;
   let h=hdr(w.n,w.s+" · "+br(l.date)+" · "+USERS[l.u||w.u].n,"home")+`<main>`;
+  if(w.u===user&&!isRun(cur.w))h+=`<button class="btn ghost" style="margin:0 0 12px" data-act="w-edit" data-v="${cur.w}">✏️ Editar este treino</button>`;
   if(w.warm)h+=`<p class="note">${w.warm}<br><b>Progressão:</b> bateu o topo da faixa em todas as séries? Suba 2,5–5 kg no próximo treino.</p>`;
   w.ex.forEach((e,ei)=>{
     const ex=EX[e.id],t=ex.t||"kg",sets=l.sets[e.id]||[],prev=prevSets(e.id,l.id);
@@ -683,6 +690,7 @@ function dayModal(){
   const U=USERS[user];
   return `<h2>${DFULL[ED.dow]}</h2><p>Escolha os treinos deste dia (${esc(U.n)}). Vale para todas as semanas. Nenhum marcado = descanso.</p>
   <div class="chips">${U.list.map(w=>`<button class="${ED.sel.includes(w)?"on":""}" data-act="toggle-day-w" data-v="${w}"><b>${W[w].k}</b>${W[w].n}</button>`).join("")}</div>
+  <p style="margin:12px 0 6px">Ou troque ${DFULL[ED.dow]} inteiro com outro dia:</p><div class="chips2">${[1,2,3,4,5,6,0].filter(d=>d!==ED.dow).map(d=>`<button data-act="day-swap" data-v="${d}">⇄ ${DN[d]}</button>`).join("")}</div>
   <button class="btn" data-act="save-day">Salvar</button>
   <div class="row-btns"><button class="btn ghost" data-act="reset-day">Voltar ao padrão</button><button class="btn ghost" data-act="modal-close">Cancelar</button></div>`;
 }
@@ -750,7 +758,7 @@ function restore(txt){
   if(o.diet)Object.entries(o.diet).forEach(([k,v])=>{if(v&&(!diet[k]||(v.upd||0)>(diet[k].upd||0))){diet[k]=v;pushDiet(k)}});try{localStorage.setItem(LSD,JSON.stringify(diet))}catch(e){}
   if(o.hl)Object.entries(o.hl).forEach(([k,v])=>{if(!v)return;if(dead["h:"+k]&&dead["h:"+k]>=(v.upd||0))return;if(!hl[k]||(v.upd||0)>(hl[k].upd||0))hl[k]=v});
   Object.keys(hl).forEach(k=>{if(dead["h:"+k]&&(hl[k].upd||0)<=dead["h:"+k])delete hl[k]});try{localStorage.setItem(LSH,JSON.stringify(hl))}catch(e){}
-  loadDynUsers();lsSave();return n;
+  loadDynUsers();applyCustom();lsSave();return n;
 }
 
 /* ---------- dieta + missões ---------- */
@@ -1173,6 +1181,57 @@ function d30View(){
   return h+`</main>`;
 }
 
+/* ---------- biblioteca + editor de treinos ---------- */
+const GROUPS=["Peito","Costas","Ombros","Bíceps","Tríceps","Quadríceps","Posterior","Glúteos","Panturrilha","Abdômen"];
+Object.assign(EX,{
+  supreto:{n:"Supino reto com barra"},supdecl:{n:"Supino declinado na máquina"},flexao:{n:"Flexão de braço",t:"bw"},crucinc:{n:"Crucifixo inclinado com halteres"},crossb:{n:"Crossover polia baixa"},
+  barrafixa:{n:"Barra fixa (ou graviton)",t:"bw"},remcurv:{n:"Remada curvada com barra"},remcav:{n:"Remada cavalinho"},lomb:{n:"Hiperextensão lombar",t:"bw"},
+  encolh:{n:"Encolhimento com halteres"},remalta:{n:"Remada alta na polia"},
+  roscadir:{n:"Rosca direta com barra reta"},roscainc:{n:"Rosca inclinada com halteres"},
+  tribanco:{n:"Mergulho no banco",t:"bw"},trikick:{n:"Tríceps coice com halter"},
+  agsumo:{n:"Agachamento sumô com halter"},legh:{n:"Leg press horizontal"},
+  goodm:{n:"Bom dia com barra"},flexpe:{n:"Flexora em pé unilateral"},
+  elevpu:{n:"Elevação pélvica unilateral",t:"bw"},abdcabo:{n:"Abdução de quadril na polia"},
+  abdrem:{n:"Abdominal remador",t:"bw"},prachdin:{n:"Prancha com toque no ombro",t:"time"}
+});
+const EXG={Peito:"supm supart supi supincm cross peck supr supreto supdecl flexao crucinc crossb",Costas:"puxtri puxab puxfr pulldab pulld remm remb rembt remsp remap remu rems remch pullover barrafixa remcurv remcav lomb",Ombros:"desm desenv arnold ella ellp elfr elfrp cruinvm cruinv facepull encolh remalta",Bíceps:"roscaw martelo conc scott roscah roscap roscacorda roscadir roscainc",Tríceps:"tricorda testa tribr tricacima triuni tricfran tribanco trikick",Quadríceps:"agl agsmith hack haunil lp45 legh ext extuni bulg bulgsm afundo afrev afstep agpc agsumo",Posterior:"mesa flex mesaflex stiffh stiffl stiffsm stiffbl terra goodm flexpe",Glúteos:"thrust hipm glute abd coice flexq elevpu abdcabo",Panturrilha:"pant pantlp pantem pantsent",Abdômen:"prancha pranchal elevp elevj deadbug birddog crunch bikeab abdpolia woodchop infra tabata abdrem prachdin"};
+Object.entries(EXG).forEach(([g,ids])=>ids.split(" ").forEach(id=>{if(EX[id])EX[id].g=g}));
+const W0={};Object.keys(W).forEach(k=>W0[k]=W[k]);
+const BASELIST={};Object.keys(USERS).forEach(u=>BASELIST[u]=USERS[u].list.slice());
+function applyCustom(){
+  hlist("exc|").forEach(x=>{const id=x.k.split("|")[1];EX[id]={n:x.n,t:x.t||undefined,g:x.g||"Abdômen",custom:1}});
+  Object.keys(W).forEach(k=>{if(W[k].custom)delete W[k]});
+  Object.keys(W0).forEach(id=>{const o=hget("wx|"+id);W[id]=o&&o.ex?{...W0[id],n:o.n||W0[id].n,s:o.s??W0[id].s,ex:o.ex}:W0[id]});
+  Object.keys(USERS).forEach(u=>{if(BASELIST[u])USERS[u].list=BASELIST[u].slice()});
+  Object.keys(USERS).forEach(u=>{if(USERS[u].dyn)USERS[u].list=(USERS[USERS[u].base]||USERS.artur).list.slice()});
+  hlist("wnew|").forEach(x=>{const p=x.k.split("|"),u=p[1],id=p[2];if(!USERS[u])return;W[id]={u,k:x.kk||"✎",n:x.n,s:x.s||"Treino personalizado",warm:x.warm||"",ex:x.ex||[],custom:1};if(!USERS[u].list.includes(id))USERS[u].list.push(id)});
+}
+let LIBQ="",LIBGR="Todos",LIBMODE={mode:"browse"};
+function libItems(){const q=norm(LIBQ);return Object.keys(EX).filter(id=>EX[id].g&&(LIBGR==="Todos"||EX[id].g===LIBGR)&&(!q||norm(EX[id].n).includes(q))).sort((a,b)=>EX[a].n.localeCompare(EX[b].n)).map(id=>`<button class="item" data-act="lib-pick" data-v="${id}"><div><strong>${esc(EX[id].n)}</strong><small>${EX[id].g}${EX[id].t==="bw"?" · peso do corpo":EX[id].t==="time"?" · por tempo":""}${EX[id].custom?" · criado por vocês":""}</small></div><span class="libgo">${LIBMODE.mode==="browse"?"▶":"+"}</span></button>`).join("")||`<p class="empty">Nada encontrado. Crie um exercício novo.</p>`}
+function libModal(){
+  const t=LIBMODE.mode==="browse"?"Biblioteca de exercícios":LIBMODE.mode==="swap"?"Trocar exercício":"Adicionar exercício";
+  openModal(`<h2>${t}</h2><p>${Object.values(EX).filter(e=>e.g).length} exercícios. ${LIBMODE.mode==="browse"?"Toque para ver a execução.":"Toque para escolher."}</p><input id="libQ" placeholder="Buscar: supino, remada, glúteo…" value="${esc(LIBQ)}" autocomplete="off"><div class="chips2 libg">${["Todos",...GROUPS].map(g=>`<button class="${g===LIBGR?"on":""}" data-act="lib-g" data-v="${g}">${g}</button>`).join("")}</div><div class="list libl">${libItems()}</div><button class="btn ghost" data-act="exc-open">+ Criar exercício novo</button><button class="btn ghost" data-act="modal-close">Fechar</button>`);
+}
+function excModal(){openModal(`<h2>Criar exercício</h2><label class="lbl">Nome</label><input id="excN" placeholder="Ex.: Remada no TRX"><label class="lbl">Grupo</label><select id="excG">${GROUPS.map(g=>`<option${g===LIBGR?" selected":""}>${g}</option>`).join("")}</select><label class="lbl">Como registra</label><select id="excT"><option value="">Carga e repetições</option><option value="bw">Só repetições (peso do corpo)</option><option value="time">Tempo (ex.: prancha)</option></select><p class="err" id="excErr"></p><button class="btn" data-act="exc-save">Criar</button><button class="btn ghost" data-act="lib-back">Voltar</button>`)}
+let ED2=null;
+function wEditOpen(id){const w=W[id];ED2={id,n:w.n,s:w.s||"",custom:!!w.custom,ex:JSON.parse(JSON.stringify(w.ex||[]))};go({name:"wedit"})}
+function newEx(id,base){const t=EX[id].t;const n=base&&base.r?base.r.length:3;return{...(base||{}),id,r:Array(n).fill(t==="time"?"30s":(base&&typeof base.r[0]==="number"?base.r[0]:12)),rg:t==="time"?"":(base&&base.rg&&typeof base.r[0]==="number"?base.rg:"8–12"),rest:base?base.rest:90,sug:undefined,tag:undefined,h:undefined}}
+function weditView(){
+  const e=ED2;let h=hdr("Editar treino",esc(e.n)+" · "+USERS[W[e.id].u].n,"w-cancel")+`<main>`;
+  h+=`<label class="lbl">Nome do treino</label><input class="tin" id="wN" value="${esc(e.n)}" maxlength="40"><label class="lbl">Descrição</label><input class="tin" id="wS" value="${esc(e.s)}" maxlength="60">`;
+  h+=`<h2 class="section-title" style="margin-top:18px">Exercícios (${e.ex.length})</h2><div class="list">`+e.ex.map((x,i)=>{const ex=EX[x.id]||{n:x.id},rest=x.rest?(x.rest>=60&&x.rest%60===0?x.rest/60+" min":x.rest+"s"):"sem descanso";return`<div class="item wrow"><button class="wmain" data-act="we-set" data-v="${i}"><strong>${i+1}. ${esc(ex.n)}</strong><small>${x.r.length}× ${esc(x.rg||String(x.r[0]))} · ${rest}${x.sug!=null?" · "+fmt(x.sug)+" kg":""} · <u>ajustar</u></small></button><div class="wbtns"><button data-act="we-up" data-v="${i}" ${i?"":"disabled"} aria-label="Subir">↑</button><button data-act="we-down" data-v="${i}" ${i<e.ex.length-1?"":"disabled"} aria-label="Descer">↓</button><button data-act="we-swap" data-v="${i}" aria-label="Trocar">⇄</button><button data-act="we-del" data-v="${i}" aria-label="Remover">✕</button></div></div>`}).join("")+`</div>`;
+  if(!e.ex.length)h+=`<p class="empty">Nenhum exercício ainda.</p>`;
+  h+=`<button class="btn ghost" data-act="we-add">+ Adicionar exercício da biblioteca</button><button class="btn" data-act="we-save">Salvar treino</button>`;
+  if(!e.custom&&hget("wx|"+e.id))h+=`<button class="btn ghost" data-act="we-reset">Voltar ao treino original</button>`;
+  if(e.custom)h+=`<button class="btn danger" data-act="we-delw">Excluir este treino</button>`;
+  return h+`<p class="hint" style="margin-top:10px">⇄ troca o exercício mantendo séries e descanso. Mudanças valem dos próximos treinos em diante; o histórico e as cargas anteriores continuam.</p></main>`;
+}
+function setModal(i){const x=ED2.ex[i],t=(EX[x.id]||{}).t;
+  openModal(`<h2>${esc((EX[x.id]||{n:x.id}).n)}</h2><div class="row-btns"><div><label class="lbl">Séries</label><input id="sS" inputmode="numeric" value="${x.r.length}"></div><div><label class="lbl">${t==="time"?"Tempo (ex.: 30s)":"Reps alvo"}</label><input id="sR" ${t==="time"?"":'inputmode="numeric"'} value="${esc(String(x.r[0]))}"></div></div>${t==="time"?"":`<label class="lbl">Faixa de reps (ex.: 8–12)</label><input id="sF" value="${esc(x.rg||"")}">`}<div class="row-btns"><div><label class="lbl">Descanso (segundos)</label><input id="sD" inputmode="numeric" value="${x.rest||0}"></div>${t?"":`<div><label class="lbl">Carga sugerida (kg)</label><input id="sK" inputmode="decimal" value="${x.sug!=null&&!Array.isArray(x.sug)?x.sug:""}"></div>`}</div>${t?"":`<label class="lbl"><input type="checkbox" id="sH" ${x.h?"checked":""}> Carga por halter (kg cada)</label>`}<label class="lbl">Dica (opcional)</label><input id="sT" value="${esc(x.tag||"")}" maxlength="120"><button class="btn" data-act="we-set-save" data-v="${i}">Aplicar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`)}
+function weSave(){const e=ED2,w=W[e.id],obj={n:(e.n||"").trim()||w.n,s:e.s,ex:e.ex};
+  if(e.custom){const k="wnew|"+w.u+"|"+e.id,o=hget(k)||{};hsave(k,{...o,...obj,kk:o.kk||w.k})}else hsave("wx|"+e.id,obj);
+  applyCustom();toast("Treino salvo ✓");go({name:"home"})}
+
 /* ---------- sync GitHub ---------- */
 const GH={owner:"aarturaraujob-collab",repo:"turugym",path:"data/turugym.json",branch:"data"};
 const LSG="th_gh_token",LSDEAD="th_dead_v1";
@@ -1238,7 +1297,9 @@ async function ghConnect(){
 
 /* ---------- eventos ---------- */
 document.addEventListener("input",e=>{
-  const el=e.target;if(el.dataset&&el.dataset.gin&&grp){const l=grp.logs[el.dataset.u],ex=W[grp.w].ex[+el.dataset.e],si=+el.dataset.s;const a=l.sets[ex.id]=l.sets[ex.id]||[];a[si]=a[si]||{};const v=el.value.replace(",",".");a[si][el.dataset.gin]=v===""?null:+v;if(a[si].ok)save(l.id);return}
+  const el=e.target;if(el.id==="libQ"){LIBQ=el.value;const l=$(".libl");if(l)l.innerHTML=libItems();return}
+  if(el.id==="wN"&&ED2){ED2.n=el.value;return}if(el.id==="wS"&&ED2){ED2.s=el.value;return}
+  if(el.dataset&&el.dataset.gin&&grp){const l=grp.logs[el.dataset.u],ex=W[grp.w].ex[+el.dataset.e],si=+el.dataset.s;const a=l.sets[ex.id]=l.sets[ex.id]||[];a[si]=a[si]||{};const v=el.value.replace(",",".");a[si][el.dataset.gin]=v===""?null:+v;if(a[si].ok)save(l.id);return}
   if(el.id==="symNote"){const s=symOf(today());hsave("s|"+user+"|"+today(),{list:s.list,note:el.value});return}
   if(el.id==="sleepIn"){const d=dget();const x=parseFloat(el.value.replace(",","."));d.sl=isNaN(x)?null:x;dsave();return}
   if(!el.dataset||!el.dataset.in||!cur)return;
@@ -1273,6 +1334,30 @@ document.addEventListener("click",e=>{
   if(act==="g-confirm"){gConfirm();return}
   if(act==="mq"){const mq=hget("mq|"+v);openModal(`<h2>Nº da máquina</h2><p>${esc(EX[v].n)}. Fica salvo para todo mundo que treina na mesma academia.</p><input id="mqIn" maxlength="12" placeholder="Ex.: 14" value="${esc(mq&&mq.n||"")}"><button class="btn" data-act="mq-save" data-v="${v}">Salvar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);setTimeout(()=>{const i=$("#mqIn");i&&i.focus()},50);return}
   if(act==="mq-save"){const t=($("#mqIn").value||"").trim();hsave("mq|"+v,t?{n:t}:null);closeModal();render();return}
+  if(act==="w-edit"){wEditOpen(v);return}
+  if(act==="w-cancel"){ED2=null;go({name:"home"});return}
+  if(act==="w-new"){openModal(`<h2>Criar treino</h2><p>Dê um nome. Depois você escolhe os exercícios na biblioteca.</p><input id="wnN" maxlength="40" placeholder="Ex.: Braços + abdômen"><p class="err" id="wnErr"></p><button class="btn" data-act="w-new-save">Criar e montar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
+  if(act==="w-new-save"){const n=($("#wnN").value||"").trim();if(!n){$("#wnErr").textContent="Dê um nome ao treino.";return}const id="c"+Date.now().toString(36),kk=n.split(/\s+/).map(p=>p[0]).join("").slice(0,2).toUpperCase();hsave("wnew|"+user+"|"+id,{n,s:"Treino personalizado",ex:[],kk});applyCustom();closeModal();wEditOpen(id);return}
+  if(act==="lib-browse"){LIBMODE={mode:"browse"};libModal();return}
+  if(act==="lib-g"){LIBGR=v;libModal();return}
+  if(act==="lib-back"){libModal();return}
+  if(act==="lib-pick"){if(LIBMODE.mode==="browse"){window.open("https://www.youtube.com/results?search_query="+encodeURIComponent(EX[v].n+" execução academia"),"_blank");return}
+    if(LIBMODE.mode==="add")ED2.ex.push(newEx(v,{r:[10,10,10],rg:"8–12",rest:90}));else ED2.ex[LIBMODE.i]=newEx(v,ED2.ex[LIBMODE.i]);closeModal();render();return}
+  if(act==="exc-open"){excModal();return}
+  if(act==="exc-save"){const n=($("#excN").value||"").trim();if(!n){$("#excErr").textContent="Digite o nome.";return}const id="x"+Date.now().toString(36);hsave("exc|"+id,{n,g:$("#excG").value,t:$("#excT").value||""});applyCustom();LIBGR=EX[id].g;LIBQ="";
+    if(LIBMODE.mode==="browse"){toast("Exercício criado");libModal();return}
+    if(LIBMODE.mode==="add")ED2.ex.push(newEx(id,{r:[10,10,10],rg:"8–12",rest:90}));else ED2.ex[LIBMODE.i]=newEx(id,ED2.ex[LIBMODE.i]);closeModal();render();return}
+  if(act==="we-add"){LIBMODE={mode:"add"};LIBQ="";libModal();return}
+  if(act==="we-swap"){LIBMODE={mode:"swap",i:+v};LIBQ="";LIBGR=(EX[ED2.ex[+v].id]||{}).g||"Todos";libModal();return}
+  if(act==="we-up"){const i=+v,a=ED2.ex;[a[i-1],a[i]]=[a[i],a[i-1]];render();return}
+  if(act==="we-down"){const i=+v,a=ED2.ex;[a[i+1],a[i]]=[a[i],a[i+1]];render();return}
+  if(act==="we-del"){ED2.ex.splice(+v,1);render();return}
+  if(act==="we-set"){setModal(+v);return}
+  if(act==="we-set-save"){const x=ED2.ex[+v],t=(EX[x.id]||{}).t,n=Math.max(1,Math.min(10,parseInt($("#sS").value,10)||x.r.length));let rv=($("#sR").value||"").trim();if(t!=="time")rv=parseInt(rv,10)||x.r[0];x.r=Array(n).fill(rv);if($("#sF"))x.rg=$("#sF").value.trim();x.rest=Math.max(0,parseInt($("#sD").value,10)||0);if($("#sK")){const k=parseFloat(($("#sK").value||"").replace(",","."));x.sug=isNaN(k)?undefined:k}if($("#sH"))x.h=$("#sH").checked?1:undefined;x.tag=$("#sT").value.trim()||undefined;closeModal();render();return}
+  if(act==="we-save"){weSave();return}
+  if(act==="we-reset"){if(!confirm("Voltar este treino ao original?"))return;hsave("wx|"+ED2.id,null);applyCustom();ED2=null;toast("Treino original restaurado");go({name:"home"});return}
+  if(act==="we-delw"){const w=W[ED2.id];if(!confirm("Excluir o treino "+w.n+"? O histórico continua salvo."))return;hsave("wnew|"+w.u+"|"+ED2.id,null);applyCustom();ED2=null;toast("Treino excluído");go({name:"home"});return}
+  if(act==="day-swap"){const d2=+v,a=plan(ED.dow).slice(),b2=plan(d2).slice();sched[user]=sched[user]||{};sched[user][ED.dow]=b2;sched[user][d2]=a;saveSched();closeModal();render();toast(DFULL[ED.dow]+" ⇄ "+DFULL[d2]);return}
   if(act==="react"){const id=b.dataset.id,k="r|"+id+"|"+user,cur=hget(k);if(cur&&cur.e===v)hsave(k,null);else hsave(k,{e:v});render();return}
   if(act==="bet-open"){const ym=today().slice(0,7),bt=hget("bet|"+ym);openModal(`<h2>Aposta do mês</h2><p>O que quem ficar em último no ranking de ${MES[+ym.slice(5)-1]} vai pagar?</p><input id="betIn" maxlength="120" placeholder="Ex.: açaí de 500 ml para todo mundo" value="${esc(bt&&bt.txt||"")}"><button class="btn" data-act="bet-save">Salvar</button><button class="btn ghost" data-act="modal-close">Cancelar</button>`);return}
   if(act==="bet-save"){const t=($("#betIn").value||"").trim();hsave("bet|"+today().slice(0,7),t?{txt:t,by:user}:null);closeModal();render();toast(t?"Aposta valendo! 💰":"Aposta removida");return}
@@ -1349,7 +1434,7 @@ document.addEventListener("pointerdown",unlockAudio,{passive:true});
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="sleepIn")render()});
 
 lsLoad();ghLoadTok();loadDynUsers();try{const u=localStorage.getItem(LSU);if(u&&USERS[u])user=u}catch(e){}
-seedMeds();render();cloudInit();if(ghTok)ghSync();
+applyCustom();seedMeds();render();cloudInit();if(ghTok)ghSync();
 </script>
 </body>
 </html>
